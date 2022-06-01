@@ -1,97 +1,211 @@
-import { ArrowLeftIcon, CheckCircleIcon, TrashIcon } from '@heroicons/react/solid';
 import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import SetupForm from "./SetupForm.js";
-import WorkflowForm from "./WorkflowForm.js";
+import Papa from "papaparse";
+import { WorkflowSessionView } from "./WorkflowSessionView";
 
 function App() {
-
-  const [submissions, setSubmissions] = useState(localStorage.getItem('submissions') === null ? [] : JSON.parse(localStorage.getItem('submissions')));
+  const [submissions, setSubmissions] = useState(
+    localStorage.getItem("submissions") === null
+      ? []
+      : JSON.parse(localStorage.getItem("submissions"))
+  );
 
   useEffect(() => {
     localStorage.setItem("submissions", JSON.stringify(submissions));
-  }, [submissions])
+  }, [submissions]);
 
-
-  const [sessionConfig, setSessionConfig] = useState(localStorage.getItem('sessionConfig') === null ? null : JSON.parse(localStorage.getItem('sessionConfig')));
+  const [sessionConfig, setSessionConfig] = useState(
+    localStorage.getItem("sessionConfig") === null
+      ? null
+      : JSON.parse(localStorage.getItem("sessionConfig"))
+  );
 
   useEffect(() => {
     localStorage.setItem("sessionConfig", JSON.stringify(sessionConfig));
-  }, [sessionConfig])
+  }, [sessionConfig]);
+
   function addSubmission(submission) {
-    setSubmissions([
-      ...submissions,
-      submission
-    ]
-    )
+    setSubmissions([...submissions, submission]);
   }
+
+  function exportSubmissionsAsCSV() {
+    let results = {
+      workflow:
+        manifest[sessionConfig.productIndex].members[
+          sessionConfig.workflowIndex
+        ].name,
+      product: manifest[sessionConfig.productIndex].name,
+      userName: sessionConfig.userName,
+      referenceNumber: sessionConfig.referenceNumber,
+      submissions: submissions.map((submission) => {
+        return {
+          ...submission,
+
+          // replace the timestamp with an excel-compatible one
+          timestamp: submission.timestamp.toLocaleString("en-US"),
+
+          // add metadata to each record
+          product: manifest[sessionConfig.productIndex].name,
+          workflow:
+            manifest[sessionConfig.productIndex].members[
+              sessionConfig.workflowIndex
+            ].name,
+          userName: sessionConfig.userName,
+          referenceNumber: sessionConfig.referenceNumber,
+        };
+      }),
+    };
+
+    // export results as CSV
+    let csv = Papa.unparse(results.submissions);
+    let blob = new Blob([csv], { type: "text/csv" });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = `${results.userName}_${results.referenceNumber}_${
+      results.workflow
+    }_${results.product}_${new Date().toISOString()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function clearAllState() {
+    setSubmissions([]);
+    setSessionConfig(null);
+  }
+
+  let manifest = [
+    {
+      // Product
+      name: "Distribution",
+      members: [
+        {
+          // Workflow
+          name: "Inbound",
+          // Definition for this workflow's form fields
+          schema: [
+            {
+              id: "sku",
+              label: "SKU",
+              type: "text",
+              initialValue: "",
+              placeholder: "64543543",
+            },
+            {
+              id: "quantity",
+              label: "Quantity",
+              type: "number",
+              initialValue: "1",
+              placeholder: "1",
+            },
+            {
+              id: "position",
+              label: "Position",
+              type: "text",
+              initialValue: "",
+              placeholder: "33A1B3",
+            },
+          ],
+        },
+        {
+          // Workflow
+          name: "Pick",
+          // Definition for this workflow's form fields
+          schema: [
+            {
+              id: "position",
+              label: "Position",
+              type: "text",
+              initialValue: "",
+              placeholder: "33A1B3",
+            },
+            {
+              id: "sku",
+              label: "SKU",
+              type: "text",
+              initialValue: "",
+              placeholder: "64543543",
+            },
+            {
+              id: "quantity",
+              label: "Quantity",
+              type: "number",
+              initialValue: "1",
+              placeholder: "1",
+            },
+          ],
+        },
+        {
+          // Workflow
+          name: "Put Away",
+          // Definition for this workflow's form fields
+          schema: [
+            {
+              id: "sku",
+              label: "SKU",
+              type: "text",
+              initialValue: "",
+              placeholder: "64543543",
+            },
+            {
+              id: "quantity",
+              label: "Quantity",
+              type: "number",
+              initialValue: "1",
+              placeholder: "1",
+            },
+            {
+              id: "position",
+              label: "Position",
+              type: "text",
+              initialValue: "",
+              placeholder: "33A1B3",
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
   return (
     <Routes>
-      <Route path="/" element={
-        sessionConfig ?
-          <>
-            <div className="flex justify-center">
-              <div className="p-4 sm:w-1/2 shadow-lg m-8 rounded-lg">
-                <p>{sessionConfig.userName} is working on a job with reference number {sessionConfig.referenceNumber}.</p>
-                <WorkflowForm questions={
-                  [
-                    {
-                      id: 'sku',
-                      label: 'SKU',
-                      type: 'text',
-                      initialValue: '',
-                      placeholder: '64543543'
-                    },
-                    {
-                      id: 'quantity',
-                      label: 'Quantity',
-                      type: 'number',
-                      initialValue: '1',
-                      placeholder: '1'
-                    },
-                    {
-                      id: 'position',
-                      label: 'Position',
-                      type: 'text',
-                      initialValue: '',
-                      placeholder: '33A1B3'
-                    }
-                  ]
-                } submissionCallback={addSubmission} />
-                <div className="mt-4 space-y-2">
-                  {submissions.map(
-                    (submission, index) => {
-                      return <p key={index}>
-                        {submission.timestamp}: {submission.quantity} item of SKU {submission.sku} stored in {submission.position}
-                      </p>
-                    }
-                  )}
+      <Route
+        path="/"
+        element={
+          sessionConfig ? (
+            <WorkflowSessionView
+              sessionConfig={sessionConfig}
+              product={manifest[sessionConfig.productIndex]}
+              workflow={
+                manifest[sessionConfig.productIndex].members[
+                  sessionConfig.workflowIndex
+                ]
+              }
+              submissionCallback={addSubmission}
+              submissions={submissions}
+              undoSubmission={() => {
+                setSubmissions(submissions.slice(0, -1));
+              }}
+              downloadResults={exportSubmissionsAsCSV}
+              clearAllState={clearAllState}
+            />
+          ) : (
+            <>
+              <div className="flex justify-center">
+                <div className="p-4 md:w-1/2 shadow-lg m-8 rounded-lg">
+                  <SetupForm
+                    submissionCallback={setSessionConfig}
+                    manifest={manifest}
+                  />
                 </div>
-                <button onClick={() => { setSubmissions(submissions.slice(0, -1)) }} type="button" className="inline-flex items-center mr-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  <ArrowLeftIcon width={20} className="mr-1" />
-                  Undo
-                </button>
-                <button onClick={() => { setSubmissions([]) }} type="button" className="inline-flex items-center mx-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  <TrashIcon width={20} className="mr-1" />
-                  Clear
-                </button>
-                <button onClick={() => { alert(JSON.stringify(sessionConfig) + JSON.stringify(submissions)); setSubmissions([]); setSessionConfig(null); }} type="button" className="inline-flex items-center mx-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  <CheckCircleIcon width={20} className="mr-1" />
-                  Complete job
-                </button>
               </div>
-            </div>
-          </> : <>
-            <div className="flex justify-center">
-              <div className="p-4 sm:w-1/2 shadow-lg m-8 rounded-lg">
-                <SetupForm submissionCallback={setSessionConfig} />
-              </div>
-            </div>
-          </>} />
+            </>
+          )
+        }
+      />
       <Route path="about" element={"About"} />
     </Routes>
-
   );
 }
 
