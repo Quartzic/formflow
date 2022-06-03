@@ -1,5 +1,6 @@
 import { Field, Form, Formik } from "formik";
 import React, { useRef } from "react";
+import classNames from "classnames";
 
 function WorkflowForm(props) {
   let initialValues = {};
@@ -8,6 +9,12 @@ function WorkflowForm(props) {
   props.schema.forEach((question) => {
     initialValues[question.id] = question.initialValue;
   });
+  let userInputFields = props.schema.filter(
+    (question) => question.type !== "derived"
+  );
+  let derivedFields = props.schema.filter(
+    (question) => question.type === "derived"
+  );
   return (
     <div className="shadow-xl p-4 rounded-lg">
       <Formik
@@ -15,60 +22,125 @@ function WorkflowForm(props) {
         validate={(values) => {
           const errors = {};
           props.schema.forEach((question) => {
-            if (!values[question.id]) {
+            // Expect input for all user input fields that aren't marked optional
+            if (
+              !values[question.id] &&
+              !question.optional &&
+              question.type !== "derived"
+            ) {
               errors[question.id] = "This field is required";
             }
           });
           return errors;
         }}
         onSubmit={async (values, { resetForm }) => {
+          let results = {};
+
+          // Get results for user-input fields from the form
+          userInputFields.forEach((question) => {
+            results[question.id] = values[question.id];
+          });
+
+          // Calculate results for derived fields based on user-input fields
+          derivedFields.forEach((question) => {
+            results[question.id] = question.formula(
+              ...question.sources.map((source) => values[source])
+            );
+          });
+
+          // Return the results to the workflow session
           props.submissionCallback({
-            ...values,
+            ...results,
             timestamp: new Date(),
           });
 
-          // clear values
+          // Clear values
           resetForm();
 
-          // focus on first form field
+          // Focus on first form field
           if (firstFormFieldRef.current) {
             firstFormFieldRef.current.focus();
           }
         }}
       >
-        {({ isSubmitting, errors, touched }) => (
+        {({ isSubmitting, errors, touched, values, submitForm }) => (
           <Form className="space-y-4">
             {
               // create one form field for every field in the schema
               props.schema.map((question, index) => {
-                return (
-                  <div key={index}>
-                    <label
-                      htmlFor={question.id}
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      {question.label}
-                    </label>
-                    <Field
-                      id={question.id}
-                      // always autofocus on the first form field
-                      autoFocus={index === 0}
-                      innerRef={index === 0 ? firstFormFieldRef : null}
-                      name={question.id}
-                      placeholder={question.placeholder}
-                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block border-gray-300 border-2 rounded-md py-2 px-3"
-                    />
+                if (question.type !== "derived") {
+                  return (
+                    <div key={index}>
+                      <label
+                        htmlFor={question.id}
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        {question.label}
+                      </label>
+                      <Field
+                        id={question.id}
+                        // Autofocus on the first field that can accept input
+                        autoFocus={userInputFields.indexOf(question) === 0}
+                        innerRef={
+                          userInputFields.indexOf(question) === 0
+                            ? firstFormFieldRef
+                            : null
+                        }
+                        // If this field is the last field that can accept input, submit the form when the user presses tab.
+                        onKeyDown={
+                          userInputFields.indexOf(question) ===
+                          userInputFields.length - 1
+                            ? (e) => {
+                                if (e.key === "Tab") {
+                                  e.preventDefault();
+                                  submitForm();
+                                }
+                              }
+                            : null
+                        }
+                        name={question.id}
+                        placeholder={question.placeholder}
+                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block border-gray-300 border-2 rounded-md py-2 px-3"
+                      />
 
-                    {
-                      // if the user has interacted with this field, but it's not validated, show an error
-                      errors[question.id] && touched[question.id] && (
-                        <div className={"text-sm text-red-500 font-semibold"}>
-                          {errors[question.id]}
-                        </div>
-                      )
-                    }
-                  </div>
-                );
+                      {
+                        // if the user has interacted with this field, but it's not validated, show an error
+                        errors[question.id] && touched[question.id] && (
+                          <div className={"text-sm text-red-500 font-semibold"}>
+                            {errors[question.id]}
+                          </div>
+                        )
+                      }
+                    </div>
+                  );
+                } else {
+                  // Calculate the value for the derived field by running the given formula with the values of the sources
+                  let formulaResult = question.formula(
+                    ...question.sources.map((source) => values[source])
+                  );
+                  return (
+                    <div key={index}>
+                      <label
+                        htmlFor={question.id}
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        {question.label}
+                      </label>
+                      <div
+                        id={question.id}
+                        className={classNames(
+                          "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block border-gray-300 border-2 rounded-md py-2 px-3",
+                          // If the formula returns true or false, color-code the output field
+                          formulaResult === true &&
+                            "text-green-700 bg-green-200",
+                          formulaResult === false && "text-red-700 bg-red-200"
+                        )}
+                      >
+                        <p>{formulaResult.toString()}</p>
+                      </div>
+                    </div>
+                  );
+                }
               })
             }
 

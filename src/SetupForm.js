@@ -30,7 +30,7 @@ const WorkflowRadioButton = ({
   );
 };
 
-function WorkflowSelector(manifest) {
+function WorkflowSelector(schema) {
   function renderProduct(product, productIndex) {
     return (
       <div className="sm:flex-auto" key={productIndex}>
@@ -56,7 +56,7 @@ function WorkflowSelector(manifest) {
 
   return (
     <div className={"sm:flex sm:flex-row sm:space-x-8"}>
-      {manifest.map((product, index) => {
+      {schema.map((product, index) => {
         return renderProduct(product, index);
       })}
     </div>
@@ -149,7 +149,7 @@ function SetupForm(props) {
             </div>
             <div>
               <h1 className={"text-2xl my-2 font-bold"}>Pick a workflow</h1>
-              {WorkflowSelector(props.manifest)}
+              {WorkflowSelector(props.schema)}
               {touched.workflow && errors.workflow && (
                 <div className={"text-sm text-red-500 font-semibold"}>
                   {errors.workflow}
