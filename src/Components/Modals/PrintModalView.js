@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { PrinterIcon, TrashIcon } from "@heroicons/react/solid";
-import WorkflowForm from "../WorkflowForm";
+import SchemaBasedForm from "../SchemaBasedForm";
+import StyledButton from "../StyledButton";
 
 function BarcodeHistoryView(barcodes, removeBarcode) {
   return (
@@ -28,8 +29,8 @@ class PrintModalView extends Component {
   render() {
     return (
       <>
-        <WorkflowForm
-          schema={[
+        <SchemaBasedForm
+          fields={[
             {
               id: "data",
               label: "Barcode Data",
@@ -45,22 +46,14 @@ class PrintModalView extends Component {
 
         {BarcodeHistoryView(this.props.barcodes, this.props.removeBarcode)}
         <div className="flex justify-center space-x-3">
-          <button
-            type="button"
-            className="mt-3 w-1/3 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            onClick={this.props.clearAllBarcodes}
-          >
+          <StyledButton onClick={this.props.clearAllBarcodes} role="danger">
             <TrashIcon className="w-6 mr-2" />
-            Clear all
-          </button>
-          <button
-            type="button"
-            className="mt-3 w-2/3 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            onClick={this.props.exportBarcodesAsCSV}
-          >
+            Clear
+          </StyledButton>
+          <StyledButton onClick={this.props.exportBarcodesAsCSV}>
             <PrinterIcon className="w-6 mr-2" />
             Print barcodes
-          </button>
+          </StyledButton>
         </div>
       </>
     );

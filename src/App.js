@@ -1,12 +1,46 @@
 import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
-import SetupForm from "./SetupForm.js";
-import Papa from "papaparse";
-import { WorkflowSessionView } from "./WorkflowSessionView";
-import { schema } from "./Schema.js";
 import NiceModal from "@ebay/nice-modal-react";
-import PrintModal from "./Modals/PrintModal";
-import { PrinterIcon } from "@heroicons/react/solid";
+import PrintModal from "./Components/Modals/PrintModal";
+import { PrinterIcon, TrashIcon } from "@heroicons/react/solid";
+import SchemaBasedForm from "./Components/SchemaBasedForm";
+import WorkflowTemplate from "./Data/WorkflowTemplate";
+import { SubmissionHistoryView } from "./Components/SubmissionHistoryView";
+import ConfirmModal from "./Components/Modals/ConfirmModal";
+
+let setupFormFields = [
+  {
+    id: "username",
+    label: "Username",
+    type: "text",
+    initialValue: "",
+    placeholder: "Jane Doe",
+  },
+  {
+    id: "refnumber",
+    label: "Reference Number",
+    type: "text",
+    initialValue: "",
+    placeholder: "64543543",
+  },
+  {
+    id: "workflow",
+    label: "Select a workflow",
+    type: "select",
+    initialValue: "pick",
+    placeholder: "64543543",
+    options: [
+      {
+        label: "Pick",
+        value: "pick",
+      },
+      {
+        label: "Ship",
+        value: "ship",
+      },
+    ],
+  },
+];
 
 function App() {
   const [submissions, setSubmissions] = useState(
@@ -55,12 +89,13 @@ function App() {
     setBarcodes([]);
   }
 
-  function exportSubmissionsAsCSV() {
+  /*  function exportSubmissionsAsCSV() {
     let results = {
       workflow:
-        schema[sessionConfig.productIndex].members[sessionConfig.workflowIndex]
-          .name,
-      product: schema[sessionConfig.productIndex].name,
+        schema.workflows[sessionConfig.productIndex].members[
+          sessionConfig.workflowIndex
+        ].name,
+      product: schema.workflows[sessionConfig.productIndex].name,
       userName: sessionConfig.userName,
       referenceNumber: sessionConfig.referenceNumber,
       submissions: submissions.map((submission) => {
@@ -71,13 +106,14 @@ function App() {
           timestamp: submission.timestamp.toLocaleString("en-US"),
 
           // add metadata to each record
-          product: schema[sessionConfig.productIndex].name,
+          product: schema.workflows[sessionConfig.productIndex].name,
           workflow:
-            schema[sessionConfig.productIndex].members[
+            schema.workflows[sessionConfig.productIndex].members[
               sessionConfig.workflowIndex
             ].name,
           userName: sessionConfig.userName,
           referenceNumber: sessionConfig.referenceNumber,
+          qtyUnits: sessionConfig.qtyUnits,
         };
       }),
     };
@@ -108,7 +144,7 @@ function App() {
     setSubmissions([]);
     setSessionConfig(null);
     setBarcodes([]);
-  }
+  }*/
 
   return (
     <>
@@ -117,30 +153,50 @@ function App() {
           path="/"
           element={
             sessionConfig ? (
-              <WorkflowSessionView
-                sessionConfig={sessionConfig}
-                product={schema[sessionConfig.productIndex]}
-                workflow={
-                  schema[sessionConfig.productIndex].members[
-                    sessionConfig.workflowIndex
-                  ]
-                }
-                submissionCallback={addSubmission}
-                submissions={submissions}
-                undoSubmission={() => {
-                  setSubmissions(submissions.slice(0, -1));
-                }}
-                downloadResults={exportSubmissionsAsCSV}
-                clearAllState={clearAllState}
-                barcodes={barcodes}
-              />
+              <div className="shadow-xl p-4 rounded-lg m-4 ">
+                <SchemaBasedForm
+                  fields={sessionConfig.submissionFields}
+                  submissionCallback={addSubmission}
+                />
+                <SubmissionHistoryView submissions={submissions} />
+                <button
+                  onClick={() => {
+                    // TODO: reimplement results download
+                    NiceModal.show(ConfirmModal, {
+                      title: "Are you sure?",
+                      message: `This will clear ${submissions.length} submissions and ${barcodes.length} barcodes, and reset the application to its original state. Make sure you've downloaded your work first.`,
+                      action: "End job",
+                      onAction: () => {
+                        setBarcodes([]);
+                        setSessionConfig(null);
+                        setSubmissions([]);
+                      },
+                    });
+                  }}
+                  type="button"
+                  className="inline-flex items-center mt-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  <TrashIcon width={20} className="mr-1" />
+                  End job
+                </button>
+              </div>
             ) : (
               <>
                 <div className="flex justify-center">
-                  <div className="p-4 md:w-1/2 shadow-lg m-8 rounded-lg">
-                    <SetupForm
-                      submissionCallback={setSessionConfig}
-                      schema={schema}
+                  <div className="p-4 w-full md:w-1/2 shadow-lg m-4 rounded-lg">
+                    <SchemaBasedForm
+                      fields={setupFormFields}
+                      submissionCallback={(values) => {
+                        if (values.workflow === "pick") {
+                          setSessionConfig({
+                            ...WorkflowTemplate,
+                            metadata: values,
+                          });
+                        } else {
+                          // TODO: handle other workflow types
+                          console.log("not implemented");
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -148,7 +204,6 @@ function App() {
             )
           }
         />
-        <Route path="about" element={"About"} />
       </Routes>
       <div className="flex justify-center items-end">
         <PrintModal
@@ -157,7 +212,7 @@ function App() {
           addBarcode={addBarcode}
           removeBarcode={removeBarcode}
           clearAllBarcodes={clearAllBarcodes}
-          exportBarcodesAsCSV={exportBarcodesAsCSV}
+          exportBarcodesAsCSV={""}
         />
         <button
           onClick={() => {
