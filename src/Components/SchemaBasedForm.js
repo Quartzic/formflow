@@ -2,6 +2,25 @@ import { Field, Form, Formik } from "formik";
 import React, { useRef } from "react";
 import classNames from "classnames";
 
+export function evaluateMagicField(field, values) {
+  let magicValue = null;
+  // Check that all expected arguments have a value in the values array; otherwise, throw an error
+  if (!field.magic.args.every((arg) => values[arg])) {
+    return "";
+  }
+  switch (field.magic.type) {
+    case "match":
+      // Match expects two arguments and checks if they are equal.
+      magicValue = values[field.magic.args[0]] === values[field.magic.args[1]];
+      break;
+    default:
+      throw new Error(
+        `Unknown magic type: ${field.magic.type} in field ${field.id}`
+      );
+  }
+  return magicValue;
+}
+
 function SchemaBasedForm(props) {
   let initialValues = {};
   const firstFormFieldRef = useRef(null);
@@ -51,7 +70,30 @@ function SchemaBasedForm(props) {
             props.fields.map((field, index) => {
               // Check if there are errors for this field—if so, highlight the field in red.
               let formFieldClass =
-                "rounded-lg border border-gray-200 border-2 block py-1 px-3 w-full";
+                "rounded-lg border border-gray-200 border-2 block py-1 px-3 text-md mt-1";
+
+              if (field.type === "select") {
+                // Select fields usually don't need much space
+                formFieldClass = classNames(formFieldClass, "md:w-2/3");
+              }
+              if (field.type === "checkbox-group") {
+                // Checkbox groups have many options, and each element within them should be spaced out.
+                formFieldClass = classNames(
+                  formFieldClass,
+                  "space-x-4 w-full md:w-full xl:w-2/3"
+                );
+              } else {
+                formFieldClass = classNames(formFieldClass, "w-2/3 xl:w-1/2");
+              }
+
+              // if this field has units associated, we remove the right border and rounding so that a span hint can show it
+              if (field.units) {
+                formFieldClass = classNames(
+                  formFieldClass,
+                  "rounded-r-none border-r-0"
+                );
+              }
+
               if (errors[field.id] && touched[field.id]) {
                 formFieldClass = classNames(
                   formFieldClass,
@@ -61,70 +103,113 @@ function SchemaBasedForm(props) {
 
               // Check if this form field is magic; if so, calculate its value.
               if (field.magic) {
-                let magicValue = null;
-                switch (field.magic.type) {
-                  case "match":
-                    // Match expects two arguments and checks if they are equal.
-                    magicValue =
-                      values[field.magic.args[0]] ===
-                      values[field.magic.args[1]];
-                    // We also will highlight the form field in red or green.
-                    formFieldClass = classNames(
-                      formFieldClass,
-                      magicValue ? "bg-green-100" : "bg-red-100"
-                    );
-                    break;
-                  default:
-                    throw new Error(`Unknown magic type: ${field.magic.type}`);
-                }
+                let magicValue = evaluateMagicField(field, values);
                 values[field.id] = magicValue;
+                // We also will highlight the form field in red or green.
+                if (magicValue === true) {
+                  formFieldClass = classNames(formFieldClass, "bg-green-100");
+                } else if (magicValue === false) {
+                  formFieldClass = classNames(formFieldClass, "bg-red-100");
+                } else {
+                  formFieldClass = classNames(formFieldClass, "bg-gray-100");
+                }
               }
 
-              return (
-                <div key={index}>
-                  <label
-                    htmlFor={field.id}
-                    className="block text-sm font-bold text-gray-700"
-                  >
-                    {field.label}
-                    {field.label === "Quantity" && `(in ${props.qtyUnits})`}
-                  </label>
-                  <Field
-                    id={field.id}
-                    as={field.type === "select" ? "select" : "input"}
-                    // Autofocus on the first field that can accept input
-                    autoFocus={normalFields.indexOf(field) === 0}
-                    innerRef={
-                      normalFields.indexOf(field) === 0
-                        ? firstFormFieldRef
-                        : null
-                    }
-                    // If this field is the last field that can accept input, submit the form when the user presses tab.
-                    onKeyDown={
-                      normalFields.indexOf(field) === normalFields.length - 1
-                        ? (e) => {
-                            if (e.key === "Tab") {
-                              e.preventDefault();
-                              submitForm();
-                            }
+              if (
+                field.type === "text" ||
+                field.type === "number" ||
+                field.type === "select" ||
+                field.type === "checkbox"
+              ) {
+                return (
+                  <div key={index}>
+                    <label
+                      htmlFor={field.id}
+                      className="block text-sm font-bold text-gray-700"
+                    >
+                      {field.label}
+                      <div className={"flex"}>
+                        <Field
+                          id={field.id}
+                          as={field.type === "select" ? "select" : "input"}
+                          type={field.type}
+                          // Autofocus on the first field that can accept input
+                          autoFocus={normalFields.indexOf(field) === 0}
+                          innerRef={
+                            normalFields.indexOf(field) === 0
+                              ? firstFormFieldRef
+                              : null
                           }
-                        : null
-                    }
-                    name={field.id}
-                    placeholder={field.placeholder}
-                    disabled={field.magic}
-                    className={formFieldClass}
-                  >
-                    {field.type === "select"
-                      ? field.options.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))
-                      : null}
-                  </Field>
-                </div>
-              );
+                          // If this field is the last field that can accept input, submit the form when the user presses tab.
+                          onKeyDown={
+                            normalFields.indexOf(field) ===
+                            normalFields.length - 1
+                              ? (e) => {
+                                  if (e.key === "Tab") {
+                                    e.preventDefault();
+                                    submitForm();
+                                  }
+                                }
+                              : null
+                          }
+                          name={field.id}
+                          placeholder={field.placeholder}
+                          // If the field is magic, it shouldn't accept user input.
+                          disabled={field.magic}
+                          // Use the composed form field class name.
+                          className={formFieldClass}
+                        >
+                          {
+                            // If the field is a select, we also need to add the options.
+                            field.type === "select"
+                              ? field.options.map((option) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))
+                              : null
+                          }
+                        </Field>
+
+                        {
+                          // if this field has units, show them in a span hint
+                          field.units && (
+                            <span className="rounded-lg border border-gray-200 border-2 border-l-0 rounded-l-none block py-1 px-3 text-md mt-1 bg-gray-50">
+                              {field.units}
+                            </span>
+                          )
+                        }
+                      </div>
+                    </label>
+                  </div>
+                );
+              } else if (field.type === "checkbox-group") {
+                return (
+                  <div key={index}>
+                    <label className="block text-sm font-bold text-gray-700">
+                      {field.label}
+                    </label>
+                    <div className={classNames(formFieldClass)}>
+                      {field.options.map((option, index) => (
+                        <label key={index}>
+                          <Field
+                            type="checkbox"
+                            // The name should be the same across all options in this group
+                            name={field.id}
+                            // The value varies based on the option
+                            value={option.value}
+                            className={"mr-1"}
+                          />
+                          {option.label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
             })
           }
 
