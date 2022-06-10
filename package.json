@@ -11,6 +11,9 @@
     "@testing-library/user-event": "^13.5.0",
     "bwip-js": "^3.0.5",
     "classnames": "^2.3.1",
+    "dexie": "^3.2.2",
+    "dexie-export-import": "^1.0.3",
+    "fast-levenshtein": "^3.0.0",
     "formik": "^2.2.9",
     "javascript-time-ago": "^2.5.4",
     "papaparse": "^5.3.2",
@@ -21,6 +24,7 @@
     "react-scripts": "5.0.1",
     "react-time-ago": "^7.2.1",
     "react-window": "^1.8.7",
+    "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

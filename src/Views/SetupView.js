@@ -1,5 +1,6 @@
 import SchemaBasedForm from "../Components/SchemaBasedForm";
 import { additionalFields } from "../Data/SetupFormTemplate";
+import { debug } from "../Data/SimpleLogger";
 
 export function setupView(fields, workflows, setMetadata, setWorkflow) {
   return (
@@ -28,6 +29,7 @@ export function setupView(fields, workflows, setMetadata, setWorkflow) {
 
           // Update the metadata with the values from the form
           setMetadata(values);
+          debug("Set metadata", values);
 
           // If a quantity-units value exists, add a hint to any matching fields in the workflow
           if (values["qtyUnits"]) {
@@ -40,6 +42,10 @@ export function setupView(fields, workflows, setMetadata, setWorkflow) {
 
           // Set the workflow to a new one based on the template and modified fields
           setWorkflow({
+            ...workflowTemplate,
+            submissionFields: workflowFields,
+          });
+          debug("Set workflow", {
             ...workflowTemplate,
             submissionFields: workflowFields,
           });

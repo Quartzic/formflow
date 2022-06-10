@@ -1,24 +1,37 @@
 import { Field, Form, Formik } from "formik";
 import React, { useRef } from "react";
 import classNames from "classnames";
+import levenshtein from "fast-levenshtein";
 
 export function evaluateMagicField(field, values) {
-  let magicValue = null;
   // Check that all expected arguments have a value in the values array; otherwise, throw an error
   if (!field.magic.args.every((arg) => values[arg])) {
     return "";
   }
+
   switch (field.magic.type) {
     case "match":
       // Match expects two arguments and checks if they are equal.
-      magicValue = values[field.magic.args[0]] === values[field.magic.args[1]];
-      break;
+      return values[field.magic.args[0]] === values[field.magic.args[1]];
+    case "fuzzyMatch":
+      // Fuzzy Match expects two arguments and returns the Levenshtein distance between them.
+      let substitutionsRequired = levenshtein.get(
+        values[field.magic.args[0]],
+        values[field.magic.args[1]]
+      );
+
+      if (substitutionsRequired > 0) {
+        return `${substitutionsRequired} difference${
+          substitutionsRequired > 1 ? "s" : ""
+        }`;
+      } else {
+        return true;
+      }
     default:
       throw new Error(
         `Unknown magic type: ${field.magic.type} in field ${field.id}`
       );
   }
-  return magicValue;
 }
 
 function SchemaBasedForm(props) {

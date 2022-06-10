@@ -1,6 +1,7 @@
 import { Component } from "react";
 import ReactTimeAgo from "react-time-ago";
 import { TrashIcon } from "@heroicons/react/solid";
+import classNames from "classnames";
 
 export class SubmissionHistoryView extends Component {
   HistoryItem(submission, index, deleteSubmission) {
@@ -15,16 +16,31 @@ export class SubmissionHistoryView extends Component {
           <div className="min-w-0 flex-1">
             <ul>
               {shownKeys.length > 1 ? (
-                shownKeys.map((key, index) => (
-                  <li key={index}>
-                    <p className="text-sm font-semibold text-gray-900 inline">
-                      {shownKeys.length > 1 && `${key}: `}
-                    </p>
-                    <p className="text-sm font-medium text-gray-500 inline">
-                      {submission[key].toString()}
-                    </p>
-                  </li>
-                ))
+                shownKeys.map((key, index) => {
+                  return (
+                    <li key={index}>
+                      <p className="text-sm font-semibold text-gray-900 inline">
+                        {shownKeys.length > 1 && `${key}: `}
+                      </p>
+                      <p
+                        className={classNames(
+                          "text-sm font-medium inline-block",
+                          // if not true or false: gray text
+                          (submission[key] !== true) &
+                            (submission[key] !== false) && "text-gray-500",
+                          // if true: green card
+                          submission[key] === true &&
+                            "bg-green-500 p-1 rounded-sm shadow-lg text-white",
+                          // if false: red card
+                          submission[key] === false &&
+                            "bg-red-500 p-1 rounded-sm shadow-lg text-white"
+                        )}
+                      >
+                        {submission[key].toString()}
+                      </p>
+                    </li>
+                  );
+                })
               ) : (
                 <li key={index}>
                   <p className="text-md font-semibold text-gray-900">
