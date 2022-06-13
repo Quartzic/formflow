@@ -4,7 +4,7 @@ import { exportDB } from "dexie-export-import";
 export const db = new Dexie("Papyrus");
 
 db.version(1).stores({
-  debugEvents: "++id, timestamp, message, data",
+  logEvents: "++id, timestamp, level, message, data",
 });
 
 export function exportDBAsJSON() {
@@ -12,7 +12,7 @@ export function exportDBAsJSON() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `papyrus_debug_${new Date().toISOString()}.json`;
+    a.download = `papyrus_log_${new Date().toISOString()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   });

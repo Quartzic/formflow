@@ -21,7 +21,7 @@ export default NiceModal.create(
           visible={modal.visible}
           hideModal={() => {
             modal.hide();
-            debug("Print modal hidden");
+            debug("Closed print modal");
           }}
         >
           <Dialog.Panel className="relative m-4 bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">

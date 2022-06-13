@@ -14,7 +14,7 @@ export default NiceModal.create(({ title, message, action, onAction }) => {
         visible={modal.visible}
         hideModal={() => {
           modal.hide();
-          debug("Confirm modal hidden");
+          debug("Closed confirm modal");
         }}
       >
         <Dialog.Panel className="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">

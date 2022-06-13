@@ -9,12 +9,12 @@ import { createSetupFormFields } from "./Data/SetupFormTemplate";
 import { WorkflowView } from "./Views/WorkflowView";
 import { setupView } from "./Views/SetupView";
 import Papa from "papaparse";
-import { debug } from "./Data/SimpleLogger";
+import { debug, error, info } from "./Data/SimpleLogger";
 import { exportDBAsJSON } from "./Data/db";
 
 function App() {
   window.onerror = (message, file, line, column, errorObject) => {
-    debug("Uncaught error:", {
+    error(`Uncaught error: ${errorObject.message}`, {
       message: message,
       file: file,
       line: line,
@@ -67,32 +67,28 @@ function App() {
   }, [metadata]);
 
   useEffect(() => {
-    debug("App loaded", {
-      submissions: submissions,
-      barcodes: barcodes,
-      workflow: workflow,
-      metadata: metadata,
-    });
+    debug("Loaded app");
+    pushAppStateToLog();
   }, []);
 
   function addSubmission(submission) {
     setSubmissions([...submissions, submission]);
-    debug("Added submission", submission);
+    info("Added submission", submission);
   }
 
   function addBarcode(barcode) {
     setBarcodes([...barcodes, barcode]);
-    debug("Barcode added", barcode);
+    info("Added barcode", barcode);
   }
   function removeBarcode(index) {
     let newBarcodes = [...barcodes];
     newBarcodes.splice(index, 1);
-    debug("Barcode removed", barcodes[index]);
+    info("Removed barcode", barcodes[index]);
     setBarcodes(newBarcodes);
   }
   function clearAllBarcodes() {
     setBarcodes([]);
-    debug("All barcodes cleared");
+    info("Cleared all barcodes");
   }
 
   function downloadCSV(csv, title) {
@@ -112,11 +108,11 @@ function App() {
       return {
         ...submission,
 
-        // replace the timestamp with an excel-compatible one
-        timestamp: submission.timestamp.toLocaleString("en-US"),
-
-        // add metadata to each record
+        // add metadata to each record; we do this before adding the submission timestamp because the metadata timestamp needs to be overwritten
         ...metadata,
+
+        // replace the submission timestamp with an excel-compatible one
+        timestamp: new Date(submission.timestamp).toLocaleString("en-US"),
       };
     });
 
@@ -152,7 +148,14 @@ function App() {
 
     debug("Cleared all state");
   }
-
+  function pushAppStateToLog() {
+    debug("Taking snapshot of current application state", {
+      submissions: submissions,
+      barcodes: barcodes,
+      workflow: workflow,
+      metadata: metadata,
+    });
+  }
   return (
     <>
       <PrintModal
@@ -189,7 +192,7 @@ function App() {
                       }}
                       onClick={() => {
                         exportSubmissionsAsCSV(submissions, metadata);
-                        debug("Showing confirm modal");
+                        debug("Opened confirm modal");
                         NiceModal.show(ConfirmModal, {
                           title: "Are you sure?",
                           message: `This will clear ${submissions.length} submissions and ${barcodes.length} barcodes, and reset the application to its original state. Make sure you've downloaded your work first.`,
@@ -216,7 +219,8 @@ function App() {
         <button
           onClick={() => {
             NiceModal.show("print-modal");
-            debug("Showing print modal");
+            debug("Opened print modal");
+            test();
           }}
           type="button"
           className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -226,14 +230,8 @@ function App() {
         </button>
         <button
           onClick={() => {
-            debug("Exporting database");
-            debug("Snapshot of current state:", {
-              submissions: submissions,
-              barcodes: barcodes,
-              workflow: workflow,
-              metadata: metadata,
-            });
-
+            pushAppStateToLog();
+            debug("Exported technical log information");
             exportDBAsJSON();
           }}
           type="button"
