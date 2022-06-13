@@ -31,5 +31,5 @@ it("evaluateMagicFieldMatch", () => {
   // If either argument that the magic field expects is not set, the magic field is not evaluated.
   expect(() => {
     evaluateMagicField(field, values);
-  }).toEqual(null);
+  }).toThrowError();
 });

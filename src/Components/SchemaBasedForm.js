@@ -4,9 +4,16 @@ import classNames from "classnames";
 import levenshtein from "fast-levenshtein";
 
 export function evaluateMagicField(field, values) {
-  // Check that all expected arguments have a value in the values array; otherwise, throw an error
-  if (!field.magic.args.every((arg) => values[arg])) {
-    return "";
+  // Check that all expected arguments have a value in the values array; otherwise, throw an error.
+
+  // Filter magic args to only those that are defined in the values array.
+  const magicArgs = field.magic.args.filter((arg) => values[arg]);
+  if (magicArgs.length !== field.magic.args.length) {
+    throw new Error(
+      `Magic field ${field.id} expects arguments ${field.magic.args.join(
+        ", "
+      )} but only ${magicArgs.join(", ")} are defined in the values array.`
+    );
   }
 
   switch (field.magic.type) {
