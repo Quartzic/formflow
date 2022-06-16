@@ -12,6 +12,8 @@ import {setupView} from "./Views/SetupView";
 import {createSetupFormFields} from "./Data/SetupFormTemplate";
 import WorkflowTemplates from "./Data/WorkflowTemplates";
 
+const appVersion = require("../package.json").version;
+
 function App() {
   window.onerror = (message, file, line, column, errorObject) => {
     error(`Uncaught error: ${errorObject.message}`, {
@@ -237,6 +239,9 @@ function App() {
             Export technical log information
           </button>
         </div>
+        <p className={"text-xs text-gray-500 mt-3"}>
+          {appVersion}
+        </p>
       </div>
     </>
   );
