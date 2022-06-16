@@ -1,6 +1,6 @@
 {
   "name": "formflow",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",

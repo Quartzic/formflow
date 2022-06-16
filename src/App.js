@@ -69,7 +69,7 @@ function App() {
   }, [metadata]);
 
   useEffect(() => {
-    info("Loaded app");
+    info(`Loaded app with version ${appVersion}`);
     pushAppStateToLog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
