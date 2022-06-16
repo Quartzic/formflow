@@ -12,7 +12,7 @@ const {
 } = require("electron");
 const path = require("path");
 const url = require("url");
-const {checkForUpdates} = require("./updater");
+const { autoUpdater } = require("electron-updater")
 const version = require("../package.json").version;
 
 app.setAboutPanelOptions({
@@ -69,9 +69,9 @@ function createWindow() {
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  autoUpdater.checkForUpdatesAndNotify()
   installElectronDevToolExtensions();
   createWindow();
-  checkForUpdates()
 });
 
 // Quit when all windows are closed.
