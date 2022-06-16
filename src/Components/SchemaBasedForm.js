@@ -1,5 +1,5 @@
-import { Field, Form, Formik } from "formik";
-import React, { useRef } from "react";
+import {Field, Form, Formik} from "formik";
+import React, {useRef} from "react";
 import classNames from "classnames";
 import levenshtein from "fast-levenshtein";
 
@@ -87,6 +87,7 @@ function SchemaBasedForm(props) {
         <Form className="space-y-4">
           {
             // create each form field
+            // eslint-disable-next-line array-callback-return
             props.fields.map((field, index) => {
               // Check if there are errors for this field—if so, highlight the field in red.
               let formFieldClass =
