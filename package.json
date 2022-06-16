@@ -1,6 +1,6 @@
 {
   "name": "formflow",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
@@ -54,6 +54,13 @@
       "buildResources": "assets"
     }
   },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "Quartzic",
+      "releaseType": "release"
+    }
+  ],
   "scripts": {
     "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build",

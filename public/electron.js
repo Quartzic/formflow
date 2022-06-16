@@ -69,6 +69,10 @@ function createWindow() {
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+
+  const log = require("electron-log")
+  log.transports.file.level = "debug"
+  autoUpdater.logger = log
   autoUpdater.checkForUpdatesAndNotify()
   installElectronDevToolExtensions();
   createWindow();
