@@ -1,5 +1,5 @@
 export const additionalFields = [
-  {
+  /*  {
     id: "lpn",
     label: "License Plate Number",
     type: "text",
@@ -19,7 +19,7 @@ export const additionalFields = [
     type: "text",
     initialValue: "",
     placeholder: "",
-  },
+  },*/
 ];
 
 export function createWorkflowSelectorOptions(workflows) {
@@ -43,16 +43,16 @@ export function createSetupFormFields(workflows) {
       label: "Username",
       type: "text",
       initialValue: "",
-      placeholder: "Jane Doe",
+      placeholder: "",
     },
     {
       id: "refNumber",
       label: "Reference Number",
       type: "text",
       initialValue: "",
-      placeholder: "64543543",
+      placeholder: "",
     },
-    {
+    /*{
       id: "qtyUnits",
       label: "Quantity units",
       type: "select",
@@ -75,7 +75,7 @@ export function createSetupFormFields(workflows) {
           value: "cartons",
         },
       ],
-    },
+    },*/
     {
       id: "workflow",
       label: "Select a workflow template",
@@ -83,7 +83,7 @@ export function createSetupFormFields(workflows) {
       initialValue: workflowSelectorOptions[0].value,
       options: workflowSelectorOptions,
     },
-    {
+    /* additionalFields.length > 0 && {
       id: "additionalFields",
       label: "Add additional fields",
       type: "checkbox-group",
@@ -95,6 +95,6 @@ export function createSetupFormFields(workflows) {
       }),
       initialValue: [],
       optional: true,
-    },
+    },*/
   ];
 }

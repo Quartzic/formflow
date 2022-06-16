@@ -80,21 +80,30 @@ export class SubmissionHistoryView extends Component {
 
     if (submissionsToDisplay.length > 0) {
       return (
-        <div className={"mt-4"}>
+        <>
           <h1 className={"text-lg font-bold"}>
             Recent Submissions ({this.props.submissions.length} total)
           </h1>
-          <ul className="divide-y divide-gray-200 overflow-y-scroll h-auto max-h-64 px-4 pr-6 shadow-inner">
+          <ul className="divide-y divide-gray-200 pr-6">
             {submissionsToDisplay.map((submission, index) =>
               this.HistoryItem(submission, index, () => {
                 this.props.deleteSubmission(submission.originalIndex);
               })
             )}
           </ul>
-        </div>
+        </>
       );
     } else {
-      return null;
+      return (
+        <div
+          className={
+            // centered vertically and horizontally
+            "flex flex-col items-center justify-center h-full"
+          }
+        >
+          <p className={"text-md text-gray-500"}>No recent submissions</p>
+        </div>
+      );
     }
   }
 }

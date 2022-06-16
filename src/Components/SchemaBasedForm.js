@@ -90,20 +90,11 @@ function SchemaBasedForm(props) {
             props.fields.map((field, index) => {
               // Check if there are errors for this field—if so, highlight the field in red.
               let formFieldClass =
-                "rounded-lg border border-gray-200 border-2 block py-1 px-3 text-md mt-1";
+                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full";
 
-              if (field.type === "select") {
-                // Select fields usually don't need much space
-                formFieldClass = classNames(formFieldClass, "md:w-2/3");
-              }
               if (field.type === "checkbox-group") {
                 // Checkbox groups have many options, and each element within them should be spaced out.
-                formFieldClass = classNames(
-                  formFieldClass,
-                  "space-x-4 w-full md:w-full xl:w-2/3"
-                );
-              } else {
-                formFieldClass = classNames(formFieldClass, "w-2/3 xl:w-1/2");
+                formFieldClass = classNames(formFieldClass, "space-x-4");
               }
 
               // if this field has units associated, we remove the right border and rounding so that a span hint can show it
@@ -123,7 +114,13 @@ function SchemaBasedForm(props) {
 
               // Check if this form field is magic; if so, calculate its value.
               if (field.magic) {
-                let magicValue = evaluateMagicField(field, values);
+                let magicValue;
+                try {
+                  magicValue = evaluateMagicField(field, values);
+                } catch (error) {
+                  // if the magic field fails to evaluate, we'll just set it as empty and not log an error.
+                  magicValue = "";
+                }
                 values[field.id] = magicValue;
                 // We also will highlight the form field in red or green.
                 if (magicValue === true) {
@@ -145,7 +142,7 @@ function SchemaBasedForm(props) {
                   <div key={index}>
                     <label
                       htmlFor={field.id}
-                      className="block text-sm font-bold text-gray-700"
+                      className="block text-md font-bold text-gray-700"
                     >
                       {field.label}
                       <div className={"flex"}>
@@ -235,7 +232,7 @@ function SchemaBasedForm(props) {
 
           <button
             type="submit"
-            className="px-4 py-2 cursor-pointer text-sm font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700"
+            className="px-4 py-2 cursor-pointer md font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700"
           >
             Submit
           </button>

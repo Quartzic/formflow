@@ -18,14 +18,18 @@ export function setupView(fields, workflows, setMetadata, setWorkflow) {
             workflowTemplate.submissionFields
           );
 
-          // Add the additional fields to the workflow; may error if the additional fields have changed since the selection was made
-          values["additionalFields"].forEach((field) => {
-            workflowFields.push(
-              additionalFields.filter(
-                (additionalField) => additionalField.id === field
-              )[0]
-            );
-          });
+          if (values["additionalFields"]) {
+            // Add the additional fields to the workflow; may error if the additional fields have changed since the selection was made
+            values["additionalFields"].forEach((field) => {
+              workflowFields.push(
+                additionalFields.filter(
+                  (additionalField) => additionalField.id === field
+                )[0]
+              );
+            });
+          } else {
+            // If the user didn't select any additional fields (or none were presented), do nothing
+          }
 
           // Update the metadata with the values from the form
           setMetadata(values);

@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import {useEffect, useState} from "react";
 import NiceModal from "@ebay/nice-modal-react";
 import PrintModal from "./Components/Modals/PrintModal";
-import { PrinterIcon, SupportIcon } from "@heroicons/react/solid";
-import WorkflowTemplates from "./Data/WorkflowTemplates";
+import {PrinterIcon, SupportIcon} from "@heroicons/react/solid";
 import ConfirmModal from "./Components/Modals/ConfirmModal";
-import { createSetupFormFields } from "./Data/SetupFormTemplate";
-import { WorkflowView } from "./Views/WorkflowView";
-import { setupView } from "./Views/SetupView";
+import {WorkflowView} from "./Views/WorkflowView";
 import Papa from "papaparse";
-import { debug, error, info } from "./Data/SimpleLogger";
-import { exportDBAsJSON } from "./Data/db";
+import {debug, error, info} from "./Data/SimpleLogger";
+import {exportDBAsJSON} from "./Data/db.js";
+import lockup from "./Logo/lockup.svg";
+import {setupView} from "./Views/SetupView";
+import {createSetupFormFields} from "./Data/SetupFormTemplate";
+import WorkflowTemplates from "./Data/WorkflowTemplates";
 
 function App() {
   window.onerror = (message, file, line, column, errorObject) => {
@@ -67,8 +67,9 @@ function App() {
   }, [metadata]);
 
   useEffect(() => {
-    debug("Loaded app");
+    info("Loaded app");
     pushAppStateToLog();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function addSubmission(submission) {
@@ -122,7 +123,7 @@ function App() {
       `${metadata.username}_${metadata.refNumber}_${metadata.workflow}`
     );
 
-    debug("Exported submissions as CSV", results);
+    info("Exported submissions as CSV", results);
   }
 
   function exportBarcodesAsCSV(submissions) {
@@ -138,7 +139,7 @@ function App() {
 
     downloadCSV(Papa.unparse(barcodes), "barcodes");
 
-    debug("Exported barcodes as CSV", barcodes);
+    info("Exported barcodes as CSV", barcodes);
   }
   function clearAllState() {
     setSubmissions([]);
@@ -146,7 +147,7 @@ function App() {
     setMetadata(null);
     setWorkflow(null);
 
-    debug("Cleared all state");
+    info("Cleared all state");
   }
   function pushAppStateToLog() {
     debug("Taking snapshot of current application state", {
@@ -168,78 +169,74 @@ function App() {
           exportBarcodesAsCSV(barcodes);
         }}
       />
-
-      <div className="flex justify-center">
-        <div className="p-4 w-full md:w-2/3 xl:w-1/2 shadow-lg m-4 rounded-lg">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                metadata ? (
-                  <>
-                    <h1 className={"font-bold text-lg"}>
-                      {workflow.name} - ref. {metadata.refNumber}
-                    </h1>
-                    <WorkflowView
-                      workflow={workflow}
-                      submissionCallback={addSubmission}
-                      submissions={submissions}
-                      deleteSubmission={(index) => {
-                        debug("Deleted submission", submissions[index]);
-                        setSubmissions(
-                          submissions.filter((_, i) => i !== index)
-                        );
-                      }}
-                      onClick={() => {
-                        exportSubmissionsAsCSV(submissions, metadata);
-                        debug("Opened confirm modal");
-                        NiceModal.show(ConfirmModal, {
-                          title: "Are you sure?",
-                          message: `This will clear ${submissions.length} submissions and ${barcodes.length} barcodes, and reset the application to its original state. Make sure you've downloaded your work first.`,
-                          action: "End job",
-                          onAction: clearAllState.bind(this),
-                        });
-                      }}
-                    />
-                  </>
-                ) : (
-                  setupView(
-                    createSetupFormFields(WorkflowTemplates),
-                    WorkflowTemplates,
-                    setMetadata,
-                    setWorkflow
-                  )
-                )
-              }
+      <div
+        className={
+          "flex flex-col items-center md:justify-center p-5 md:h-screen w-full max-h-screen"
+        }
+      >
+        <img src={lockup} className="w-64 pointer-events-none" alt={"Formflow logo"} />
+        {metadata && (
+          <h1 className={"font-bold text-xl text-center mt-3"}>
+            {workflow.name} - ref. {metadata.refNumber}
+          </h1>
+        )}
+        {metadata ? (
+          <div className="p-4 w-full max-w-4xl shadow-lg m-4 rounded-lg flex-1 md:h-0">
+            <WorkflowView
+              workflow={workflow}
+              submissionCallback={addSubmission}
+              submissions={submissions}
+              deleteSubmission={(index) => {
+                debug("Deleted submission", submissions[index]);
+                setSubmissions(submissions.filter((_, i) => i !== index));
+              }}
+              onClick={() => {
+                exportSubmissionsAsCSV(submissions, metadata);
+                debug("Opened confirm modal");
+                NiceModal.show(ConfirmModal, {
+                  title: "Are you sure?",
+                  message: `This will clear ${submissions.length} submissions and ${barcodes.length} barcodes, and reset the application to its original state. Make sure you've downloaded your work first.`,
+                  action: "End job",
+                  onAction: clearAllState.bind(this),
+                });
+              }}
             />
-          </Routes>
+          </div>
+        ) : (
+          <div className="p-4 w-full max-w-lg shadow-lg m-4 rounded-lg">
+            {setupView(
+              createSetupFormFields(WorkflowTemplates),
+              WorkflowTemplates,
+              setMetadata,
+              setWorkflow
+            )}
+          </div>
+        )}
+        <div className="sm:flex justify-center items-end">
+          <button
+            onClick={() => {
+              NiceModal.show("print-modal");
+              debug("Opened print modal");
+            }}
+            type="button"
+            className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <PrinterIcon width={20} className="mr-1" />
+            Print barcodes
+          </button>
+          <button
+            onClick={() => {
+              pushAppStateToLog();
+              debug("Exported technical log information");
+              exportDBAsJSON();
+            }}
+            type="button"
+            className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <SupportIcon width={20} className={"mr-1"} />
+            Export technical log information
+          </button>
         </div>
-      </div>
-      <div className="flex justify-center items-end">
-        <button
-          onClick={() => {
-            NiceModal.show("print-modal");
-            debug("Opened print modal");
-            test();
-          }}
-          type="button"
-          className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <PrinterIcon width={20} className="mr-1" />
-          Print barcodes
-        </button>
-        <button
-          onClick={() => {
-            pushAppStateToLog();
-            debug("Exported technical log information");
-            exportDBAsJSON();
-          }}
-          type="button"
-          className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <SupportIcon width={20} className={"mr-1"} />
-          Export technical log information
-        </button>
       </div>
     </>
   );
