@@ -18,6 +18,8 @@
     "dexie": "^3.2.2",
     "dexie-export-import": "^1.0.3",
     "electron-devtools-installer": "^3.2.0",
+    "electron-log": "^4.4.7",
+    "electron-updater": "^5.0.1",
     "fast-levenshtein": "^3.0.0",
     "formik": "^2.2.9",
     "is-electron": "^2.2.1",
@@ -58,9 +60,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron:dev": "concurrently \"npm run start\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:pack": "npm run build && electron-builder --dir",
-    "electron:dist": "npm run build && electron-builder",
-    "electron:dist-win": "npm run build && electron-builder --win portable --x64"
+    "electron:pack-mac": "npm run build && electron-builder --dir",
+    "electron:dist": "npm run build && electron-builder --win --x64"
   },
   "eslintConfig": {
     "extends": [

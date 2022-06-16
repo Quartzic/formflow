@@ -12,6 +12,7 @@ const {
 } = require("electron");
 const path = require("path");
 const url = require("url");
+const {checkForUpdates} = require("./updater");
 const version = require("../package.json").version;
 
 app.setAboutPanelOptions({
@@ -70,6 +71,7 @@ function createWindow() {
 app.whenReady().then(() => {
   installElectronDevToolExtensions();
   createWindow();
+  checkForUpdates()
 });
 
 // Quit when all windows are closed.
