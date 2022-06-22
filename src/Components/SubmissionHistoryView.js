@@ -1,6 +1,6 @@
-import { Component } from "react";
+import {Component} from "react";
 import ReactTimeAgo from "react-time-ago";
-import { TrashIcon } from "@heroicons/react/solid";
+import {TrashIcon} from "@heroicons/react/solid";
 import classNames from "classnames";
 
 export class SubmissionHistoryView extends Component {
@@ -24,7 +24,8 @@ export class SubmissionHistoryView extends Component {
                       </p>
                       <p
                         className={classNames(
-                          "text-sm font-medium inline-block",
+                            // it's important to use ph-no-capture so that PostHog doesn't record data here
+                          "text-sm font-medium inline-block ph-no-capture",
                           // if not true or false: gray text
                           (submission[key] !== true) &
                             (submission[key] !== false) && "text-gray-500",
@@ -75,7 +76,7 @@ export class SubmissionHistoryView extends Component {
       return { ...submission, originalIndex: index };
     });
 
-    // show submissions in reverse chronological order
+    // show submissionsSlice in reverse chronological order
     let submissionsToDisplay = submissions.reverse();
 
     if (submissionsToDisplay.length > 0) {

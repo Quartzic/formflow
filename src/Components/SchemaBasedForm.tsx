@@ -1,9 +1,25 @@
-import {Field, Form, Formik} from "formik";
+import {Field, Form, Formik, FormikValues} from "formik";
 import React, {useRef} from "react";
 import classNames from "classnames";
+// @ts-ignore
 import levenshtein from "fast-levenshtein";
 
-export function evaluateMagicField(field, values) {
+interface MagicSchema {
+  args: string[]
+  type: string | boolean
+}
+interface FieldSchema {
+  options?: {label: string, value: string}[];
+  units?: any;
+  optional?: Boolean;
+    id: string
+    label: string
+    type: string
+    initialValue?: any
+    placeholder?: string
+    magic?: MagicSchema
+}
+export function evaluateMagicField(field: { magic: MagicSchema, id: string }, values: FormikValues) {
   // Check that all expected arguments have a value in the values array; otherwise, throw an error.
 
   // Filter magic args to only those that are defined in the values array.
@@ -41,8 +57,8 @@ export function evaluateMagicField(field, values) {
   }
 }
 
-function SchemaBasedForm(props) {
-  let initialValues = {};
+function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void; }) {
+  let initialValues : {[key: string]: string;} = {};
   const firstFormFieldRef = useRef(null);
   props.fields.forEach((field) => {
     initialValues[field.id] = field.initialValue;
@@ -53,7 +69,7 @@ function SchemaBasedForm(props) {
     <Formik
       initialValues={initialValues}
       validate={(values) => {
-        const errors = {};
+        const errors : {[key: string]: string} = {};
         // For each field in the schema, we need to check if it's in an error state.
         props.fields.forEach((field) => {
           // The field only requires user input if it's not optional or magic.
@@ -71,11 +87,12 @@ function SchemaBasedForm(props) {
         // Return the results to the workflow session
         props.submissionCallback({
           ...values,
-          timestamp: new Date(),
+          timestamp: new Date().toLocaleString(),
         });
 
         // Focus on first form field
         if (firstFormFieldRef.current) {
+          // @ts-ignore
           firstFormFieldRef.current.focus();
         }
 
@@ -89,9 +106,9 @@ function SchemaBasedForm(props) {
             // create each form field
             // eslint-disable-next-line array-callback-return
             props.fields.map((field, index) => {
-              // Check if there are errors for this field—if so, highlight the field in red.
+              // Check if there are errors for this field—if so, highlight the field in red. We also apply ph-no-capture to the field so that PostHog won't get sensitive info.
               let formFieldClass =
-                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full";
+                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full ph-no-capture";
 
               if (field.type === "checkbox-group") {
                 // Checkbox groups have many options, and each element within them should be spaced out.
@@ -117,11 +134,13 @@ function SchemaBasedForm(props) {
               if (field.magic) {
                 let magicValue;
                 try {
+                  // @ts-ignore
                   magicValue = evaluateMagicField(field, values);
                 } catch (error) {
                   // if the magic field fails to evaluate, we'll just set it as empty and not log an error.
                   magicValue = "";
                 }
+                // @ts-ignore
                 values[field.id] = magicValue;
                 // We also will highlight the form field in red or green.
                 if (magicValue === true) {
@@ -139,6 +158,10 @@ function SchemaBasedForm(props) {
                 field.type === "select" ||
                 field.type === "checkbox"
               ) {
+                // @ts-ignore
+                // @ts-ignore
+                // @ts-ignore
+                // @ts-ignore
                 return (
                   <div key={index}>
                     <label
@@ -162,7 +185,7 @@ function SchemaBasedForm(props) {
                           onKeyDown={
                             normalFields.indexOf(field) ===
                             normalFields.length - 1
-                              ? (e) => {
+                              ? (e: { key: string; preventDefault: () => void; }) => {
                                   if (e.key === "Tab") {
                                     e.preventDefault();
                                     submitForm();
@@ -180,6 +203,7 @@ function SchemaBasedForm(props) {
                           {
                             // If the field is a select, we also need to add the options.
                             field.type === "select"
+                                // @ts-ignore
                               ? field.options.map((option) => (
                                   <option
                                     key={option.value}
@@ -211,7 +235,8 @@ function SchemaBasedForm(props) {
                       {field.label}
                     </label>
                     <div className={classNames(formFieldClass)}>
-                      {field.options.map((option, index) => (
+                      { // @ts-ignore
+                        field.options.map((option, index) => (
                         <label key={index}>
                           <Field
                             type="checkbox"
