@@ -1,98 +1,43 @@
-import {useEffect, useState} from "react";
 import NiceModal from "@ebay/nice-modal-react";
 import PrintModal from "./Components/Modals/PrintModal";
 import {PrinterIcon, SupportIcon} from "@heroicons/react/solid";
 import ConfirmModal from "./Components/Modals/ConfirmModal";
 import {WorkflowView} from "./Views/WorkflowView";
 import Papa from "papaparse";
-import {debug, error, info} from "./Data/SimpleLogger";
 import {exportDBAsJSON} from "./Data/db.js";
 import lockup from "./Logo/lockup.svg";
 import {setupView} from "./Views/SetupView";
 import {createSetupFormFields} from "./Data/SetupFormTemplate";
 import WorkflowTemplates from "./Data/WorkflowTemplates";
+import {useDispatch, useSelector} from "react-redux";
+import submissionsSlice from "./Redux/submissionsSlice";
+import barcodesSlice from "./Redux/barcodesSlice";
+import metadataSlice from "./Redux/metadataSlice";
+import workflowSlice from "./Redux/workflowSlice";
+import * as Sentry from "@sentry/react";
 
 const appVersion = require("../package.json").version;
+function preprocessSubmissionsForCSVExport(submissions, metadata) {
+  return submissions.map((submission) => {
+    return {
+      ...submission,
+
+      // add metadata to each record; we do this before adding the submission timestamp because the metadata timestamp needs to be overwritten
+      ...metadata,
+
+      // replace the submission timestamp with an excel-compatible one
+      timestamp: new Date(submission.timestamp).toLocaleString("en-US"),
+    };
+  });
+}
 
 function App() {
-  window.onerror = (message, file, line, column, errorObject) => {
-    error(`Uncaught error: ${errorObject.message}`, {
-      message: message,
-      file: file,
-      line: line,
-      column: column,
-      errorStack: errorObject.stack,
-    });
 
-    //the error can still be triggered as usual, we just wanted to know what's happening on the client side
-    return false;
-  };
-
-  const [submissions, setSubmissions] = useState(
-    localStorage.getItem("submissions") === null
-      ? []
-      : JSON.parse(localStorage.getItem("submissions"))
-  );
-
-  const [barcodes, setBarcodes] = useState(
-    localStorage.getItem("barcodes") === null
-      ? []
-      : JSON.parse(localStorage.getItem("barcodes"))
-  );
-
-  const [workflow, setWorkflow] = useState(
-    localStorage.getItem("workflow") === null
-      ? null
-      : JSON.parse(localStorage.getItem("workflow"))
-  );
-
-  const [metadata, setMetadata] = useState(
-    localStorage.getItem("metadata") === null
-      ? null
-      : JSON.parse(localStorage.getItem("metadata"))
-  );
-
-  useEffect(() => {
-    localStorage.setItem("submissions", JSON.stringify(submissions));
-  }, [submissions]);
-
-  useEffect(() => {
-    localStorage.setItem("barcodes", JSON.stringify(barcodes));
-  }, [barcodes]);
-
-  useEffect(() => {
-    localStorage.setItem("workflow", JSON.stringify(workflow));
-  }, [workflow]);
-
-  useEffect(() => {
-    localStorage.setItem("metadata", JSON.stringify(metadata));
-  }, [metadata]);
-
-  useEffect(() => {
-    info(`Loaded app with version ${appVersion}`);
-    pushAppStateToLog();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function addSubmission(submission) {
-    setSubmissions([...submissions, submission]);
-    info("Added submission", submission);
-  }
-
-  function addBarcode(barcode) {
-    setBarcodes([...barcodes, barcode]);
-    info("Added barcode", barcode);
-  }
-  function removeBarcode(index) {
-    let newBarcodes = [...barcodes];
-    newBarcodes.splice(index, 1);
-    info("Removed barcode", barcodes[index]);
-    setBarcodes(newBarcodes);
-  }
-  function clearAllBarcodes() {
-    setBarcodes([]);
-    info("Cleared all barcodes");
-  }
+  const dispatch = useDispatch();
+  const submissions = useSelector((state) => state.submissions.present);
+  const barcodes = useSelector((state) => state.barcodes.present);
+  const metadata = useSelector((state) => state.metadata);
+  const workflow = useSelector((state) => state.workflow);
 
   function downloadCSV(csv, title) {
     let blob = new Blob([csv], { type: "text/csv" });
@@ -105,19 +50,8 @@ function App() {
   }
 
   function exportSubmissionsAsCSV(submissions, metadata) {
-    // We need to apply metadata to the submissions
-
-    let results = submissions.map((submission) => {
-      return {
-        ...submission,
-
-        // add metadata to each record; we do this before adding the submission timestamp because the metadata timestamp needs to be overwritten
-        ...metadata,
-
-        // replace the submission timestamp with an excel-compatible one
-        timestamp: new Date(submission.timestamp).toLocaleString("en-US"),
-      };
-    });
+    // We need to apply metadata to the submissionsSlice
+    let results = preprocessSubmissionsForCSVExport(submissions, metadata);
 
     // export results as CSV
     downloadCSV(
@@ -125,7 +59,6 @@ function App() {
       `${metadata.username}_${metadata.refNumber}_${metadata.workflow}`
     );
 
-    info("Exported submissions as CSV", results);
   }
 
   function exportBarcodesAsCSV(submissions) {
@@ -141,32 +74,23 @@ function App() {
 
     downloadCSV(Papa.unparse(barcodes), "barcodes");
 
-    info("Exported barcodes as CSV", barcodes);
-  }
-  function clearAllState() {
-    setSubmissions([]);
-    setBarcodes([]);
-    setMetadata(null);
-    setWorkflow(null);
-
-    info("Cleared all state");
-  }
-  function pushAppStateToLog() {
-    debug("Taking snapshot of current application state", {
-      submissions: submissions,
-      barcodes: barcodes,
-      workflow: workflow,
-      metadata: metadata,
-    });
   }
   return (
     <>
       <PrintModal
         id="print-modal"
         barcodes={barcodes}
-        addBarcode={addBarcode}
-        removeBarcode={removeBarcode}
-        clearAllBarcodes={clearAllBarcodes}
+        addBarcode={(barcode) => {
+          dispatch(barcodesSlice.actions.add(barcode));
+        }
+        }
+        removeBarcode={(barcode) => {
+          dispatch(barcodesSlice.actions.remove(barcode));
+        }
+        }
+        clearAllBarcodes={() => {
+          dispatch(barcodesSlice.actions.clear());}
+        }
         exportBarcodesAsCSV={() => {
           exportBarcodesAsCSV(barcodes);
         }}
@@ -186,20 +110,25 @@ function App() {
           <div className="p-4 w-full max-w-4xl shadow-lg m-4 rounded-lg flex-1 md:h-0">
             <WorkflowView
               workflow={workflow}
-              submissionCallback={addSubmission}
+              submissionCallback={
+                (submission) => {dispatch(submissionsSlice.actions.add(submission))}}
               submissions={submissions}
               deleteSubmission={(index) => {
-                debug("Deleted submission", submissions[index]);
-                setSubmissions(submissions.filter((_, i) => i !== index));
+                dispatch(submissionsSlice.actions.remove(index));
               }}
               onClick={() => {
                 exportSubmissionsAsCSV(submissions, metadata);
-                debug("Opened confirm modal");
                 NiceModal.show(ConfirmModal, {
                   title: "Are you sure?",
                   message: `This will clear ${submissions.length} submissions and ${barcodes.length} barcodes, and reset the application to its original state. Make sure you've downloaded your work first.`,
                   action: "End job",
-                  onAction: clearAllState.bind(this),
+                  onAction: () => {
+                    dispatch(submissionsSlice.actions.clear());
+                    dispatch(barcodesSlice.actions.clear());
+                    dispatch(metadataSlice.actions.clear());
+                    dispatch(workflowSlice.actions.clear());
+
+                  }
                 });
               }}
             />
@@ -209,8 +138,13 @@ function App() {
             {setupView(
               createSetupFormFields(WorkflowTemplates),
               WorkflowTemplates,
-              setMetadata,
-              setWorkflow
+              (metadata)  => {
+                dispatch(metadataSlice.actions.set(metadata));
+                Sentry.setUser({username: metadata.username});
+              },
+                (workflow)  => {
+                  dispatch(workflowSlice.actions.set(workflow));
+                },
             )}
           </div>
         )}
@@ -218,7 +152,6 @@ function App() {
           <button
             onClick={() => {
               NiceModal.show("print-modal");
-              debug("Opened print modal");
             }}
             type="button"
             className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -228,8 +161,6 @@ function App() {
           </button>
           <button
             onClick={() => {
-              pushAppStateToLog();
-              debug("Exported technical log information");
               exportDBAsJSON();
             }}
             type="button"

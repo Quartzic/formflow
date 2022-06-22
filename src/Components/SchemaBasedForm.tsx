@@ -57,7 +57,7 @@ export function evaluateMagicField(field: { magic: MagicSchema, id: string }, va
   }
 }
 
-function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (arg0: { timestamp: Date; }) => void; }) {
+function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void; }) {
   let initialValues : {[key: string]: string;} = {};
   const firstFormFieldRef = useRef(null);
   props.fields.forEach((field) => {
@@ -87,7 +87,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
         // Return the results to the workflow session
         props.submissionCallback({
           ...values,
-          timestamp: new Date(),
+          timestamp: new Date().toLocaleString(),
         });
 
         // Focus on first form field
