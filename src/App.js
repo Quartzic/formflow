@@ -1,10 +1,9 @@
 import NiceModal from "@ebay/nice-modal-react";
 import PrintModal from "./Components/Modals/PrintModal";
-import {PrinterIcon, SupportIcon} from "@heroicons/react/solid";
+import {PrinterIcon} from "@heroicons/react/solid";
 import ConfirmModal from "./Components/Modals/ConfirmModal";
 import {WorkflowView} from "./Views/WorkflowView";
 import Papa from "papaparse";
-import {exportDBAsJSON} from "./Data/db.js";
 import lockup from "./Logo/lockup.svg";
 import {setupView} from "./Views/SetupView";
 import {createSetupFormFields} from "./Data/SetupFormTemplate";
@@ -15,8 +14,19 @@ import barcodesSlice from "./Redux/barcodesSlice";
 import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
 import * as Sentry from "@sentry/react";
+import {ToastContainer} from "react-toastify";
+import React from "react";
+import 'react-toastify/dist/ReactToastify.css';
+import posthog from 'posthog-js';
 
 const appVersion = require("../package.json").version;
+
+posthog.init("phc_cQmnFnVzHM75RTp2mzOB7GbZDtjsSi8GFDbFEnRDhqD", {api_host: 'https://app.posthog.com'});
+posthog.register({
+  environment: (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') ? "development" : "production",
+  version: appVersion
+})
+
 function preprocessSubmissionsForCSVExport(submissions, metadata) {
   return submissions.map((submission) => {
     return {
@@ -34,10 +44,41 @@ function preprocessSubmissionsForCSVExport(submissions, metadata) {
 function App() {
 
   const dispatch = useDispatch();
-  const submissions = useSelector((state) => state.submissions.present);
-  const barcodes = useSelector((state) => state.barcodes.present);
-  const metadata = useSelector((state) => state.metadata);
-  const workflow = useSelector((state) => state.workflow);
+  const submissions = useSelector((state) => state.present.submissions);
+  const barcodes = useSelector((state) => state.present.barcodes);
+  const metadata = useSelector((state) => state.present.metadata);
+  const workflow = useSelector((state) => state.present.workflow);/*
+  useMousetrap(["ctrl+z", "command+z"], () => {
+
+    if(store.getState().past.length > 0) {
+
+      dispatch(UndoActionCreators.undo())
+      toast(
+          <p className={"text-gray-900 text-lg"}>
+            Undid an action
+            <br/>
+            <p className={"text-xs text-gray-500"}>Press <kbd>Ctrl+Y</kbd> to redo</p>
+          </p>);
+    }else{
+        toast(
+            "No more actions to undo")
+      }
+
+    });
+  useMousetrap(["ctrl+y", "command+shift+z"], () => {
+    if(store.getState().future.length > 0) {
+      dispatch(UndoActionCreators.redo())
+      toast(
+          <p className={"text-gray-900 text-lg"}>
+            Redid an action
+            <br/>
+            <p className={"text-xs text-gray-500"}>Press <kbd>Ctrl+Z</kbd> to undo</p>
+          </p>);
+    }else{
+        toast("Nothing to redo", {type: "error"});
+    }
+  });
+*/
 
   function downloadCSV(csv, title) {
     let blob = new Blob([csv], { type: "text/csv" });
@@ -101,17 +142,18 @@ function App() {
         }
       >
         <img src={lockup} className="w-64 pointer-events-none" alt={"Formflow logo"} />
-        {metadata && (
+        {(metadata && workflow) && (
           <h1 className={"font-bold text-xl text-center mt-3"}>
             {workflow.name} - ref. {metadata.refNumber}
           </h1>
         )}
-        {metadata ? (
+        {metadata && workflow ? (
           <div className="p-4 w-full max-w-4xl shadow-lg m-4 rounded-lg flex-1 md:h-0">
             <WorkflowView
               workflow={workflow}
               submissionCallback={
-                (submission) => {dispatch(submissionsSlice.actions.add(submission))}}
+                (submission) => {
+                  dispatch(submissionsSlice.actions.add(submission))}}
               submissions={submissions}
               deleteSubmission={(index) => {
                 dispatch(submissionsSlice.actions.remove(index));
@@ -127,7 +169,6 @@ function App() {
                     dispatch(barcodesSlice.actions.clear());
                     dispatch(metadataSlice.actions.clear());
                     dispatch(workflowSlice.actions.clear());
-
                   }
                 });
               }}
@@ -159,21 +200,22 @@ function App() {
             <PrinterIcon width={20} className="mr-1" />
             Print barcodes
           </button>
-          <button
-            onClick={() => {
-              exportDBAsJSON();
-            }}
-            type="button"
-            className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <SupportIcon width={20} className={"mr-1"} />
-            Export technical log information
-          </button>
         </div>
         <p className={"text-xs text-gray-500 mt-3"}>
           {appVersion}
         </p>
       </div>
+
+      <ToastContainer position="top-right"
+                      autoClose={1500}
+                      newestOnTop={false}
+                      closeOnClick
+                      rtl={false}
+                      pauseOnFocusLoss
+                      draggable
+                      hideProgressBar={true}
+                      closeButton={false}
+                      pauseOnHover />
     </>
   );
 }

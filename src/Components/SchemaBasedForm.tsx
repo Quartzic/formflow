@@ -106,9 +106,9 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
             // create each form field
             // eslint-disable-next-line array-callback-return
             props.fields.map((field, index) => {
-              // Check if there are errors for this field—if so, highlight the field in red.
+              // Check if there are errors for this field—if so, highlight the field in red. We also apply ph-no-capture to the field so that PostHog won't get sensitive info.
               let formFieldClass =
-                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full";
+                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full ph-no-capture";
 
               if (field.type === "checkbox-group") {
                 // Checkbox groups have many options, and each element within them should be spaced out.

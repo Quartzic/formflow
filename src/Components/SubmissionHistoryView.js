@@ -24,7 +24,8 @@ export class SubmissionHistoryView extends Component {
                       </p>
                       <p
                         className={classNames(
-                          "text-sm font-medium inline-block",
+                            // it's important to use ph-no-capture so that PostHog doesn't record data here
+                          "text-sm font-medium inline-block ph-no-capture",
                           // if not true or false: gray text
                           (submission[key] !== true) &
                             (submission[key] !== false) && "text-gray-500",

@@ -8,6 +8,7 @@ import barcodesSlice from "./barcodesSlice";
 import workflowSlice from "./workflowSlice";
 import metadataSlice from "./metadataSlice";
 import * as Sentry from "@sentry/react";
+import posthogMiddleware from "./posthogMiddleware";
 
 // ...
 
@@ -29,13 +30,13 @@ const sentryReduxEnhancer = Sentry.createReduxEnhancer({
     },
 });
 
-export const reducers = combineReducers({
-    submissions: undoable(submissionsSlice.reducer),
-    barcodes: undoable(barcodesSlice.reducer),
+export const reducers = undoable(combineReducers({
+    submissions: submissionsSlice.reducer,
+    barcodes: barcodesSlice.reducer,
     workflow: workflowSlice.reducer,
     metadata: metadataSlice.reducer,
 
-});
+}));
 
 const persistedRootReducer = persistReducer({
     key: 'root',
@@ -51,6 +52,6 @@ export const store = configureStore({
             serializableCheck: {
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
-        }),
+        }).concat(posthogMiddleware),
     enhancers: [sentryReduxEnhancer]
 })
