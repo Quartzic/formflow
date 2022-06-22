@@ -22,7 +22,7 @@ const sentryReduxEnhancer = Sentry.createReduxEnhancer({
         
         // Transform the state to remove sensitive information
         return {
-            ...state,
+            ...state.present,
             submissions: null,
             barcodes: null
         };
