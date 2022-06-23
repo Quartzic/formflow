@@ -13,6 +13,7 @@ import {persistStore} from "redux-persist";
 import * as Sentry from "@sentry/react";
 import {BrowserTracing} from "@sentry/tracing";
 import {Offline as OfflineIntegration} from "@sentry/integrations"
+import posthog from "posthog-js";
 
 const version = require('../package.json').version
 
@@ -20,7 +21,7 @@ Sentry.init({
     dsn: "https://46f242cb9fc74758a84711173f79f087@o201925.ingest.sentry.io/6521070",
     integrations: [new BrowserTracing(), new OfflineIntegration({
       maxStoredEvents: 30
-    })],
+    }), new posthog.SentryIntegration(posthog, 'quartzic', 6521070)],
 
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
