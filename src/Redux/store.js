@@ -9,6 +9,7 @@ import workflowSlice from "./workflowSlice";
 import metadataSlice from "./metadataSlice";
 import * as Sentry from "@sentry/react";
 import posthogMiddleware from "./posthogMiddleware";
+import databaseQueueSlice from "./databaseQueueSlice";
 
 // ...
 
@@ -35,7 +36,7 @@ export const reducers = undoable(combineReducers({
     barcodes: barcodesSlice.reducer,
     workflow: workflowSlice.reducer,
     metadata: metadataSlice.reducer,
-
+    databaseQueue: databaseQueueSlice.reducer
 }));
 
 const persistedRootReducer = persistReducer({

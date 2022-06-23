@@ -14,10 +14,11 @@ import barcodesSlice from "./Redux/barcodesSlice";
 import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
 import * as Sentry from "@sentry/react";
-import {ToastContainer} from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
 import React from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import posthog from 'posthog-js';
+import {addSubmissionToDB} from "./Data/postgrest";
 
 const appVersion = require("../package.json").version;
 
@@ -112,7 +113,6 @@ function App() {
         }),
       ],
     ];
-
     downloadCSV(Papa.unparse(barcodes), "barcodes");
 
   }
@@ -153,7 +153,14 @@ function App() {
               workflow={workflow}
               submissionCallback={
                 (submission) => {
-                  dispatch(submissionsSlice.actions.add(submission))}}
+                  dispatch(submissionsSlice.actions.add(submission))
+                  addSubmissionToDB(submission, metadata).then((response) => {
+                    if (response.status === 201) {
+                      toast.success("Submission added to database");
+                    } else {
+                      toast.error(`Submission failed to add to database: ${response.statusText}`);
+                    }
+                  })}}
               submissions={submissions}
               deleteSubmission={(index) => {
                 dispatch(submissionsSlice.actions.remove(index));
