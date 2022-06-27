@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { PrinterIcon, TrashIcon } from "@heroicons/react/solid";
+import React, {Component} from "react";
+import {PrinterIcon, TrashIcon} from "@heroicons/react/solid";
 import SchemaBasedForm from "../SchemaBasedForm";
 import StyledButton from "../StyledButton";
 import SubmissionHistoryView from "../SubmissionHistoryView";
@@ -8,6 +8,13 @@ class PrintModalView extends Component {
   render() {
     return (
       <>
+          <div className={"space-y-4"}>
+          { this.props.barcodes.length >= 6 ? <div>
+              <p className={"text-center"}>
+                A barcode print job can't have more than 6 barcodes.
+              </p>
+              </div>
+              :
         <SchemaBasedForm
           fields={[
             {
@@ -21,12 +28,13 @@ class PrintModalView extends Component {
           submissionCallback={(submission) => {
             this.props.addBarcode(submission);
           }}
-        />
-
+        /> }
+<div className={"shadow-lg rounded-lg px-4 py-2"}>
         <SubmissionHistoryView
           submissions={this.props.barcodes}
           deleteSubmission={this.props.removeBarcode}
-        />
+          compact
+        /></div>
 
         <div className="flex justify-center space-x-3">
           <StyledButton onClick={this.props.clearAllBarcodes} role="danger">
@@ -38,6 +46,7 @@ class PrintModalView extends Component {
             Print barcodes
           </StyledButton>
         </div>
+          </div>
       </>
     );
   }

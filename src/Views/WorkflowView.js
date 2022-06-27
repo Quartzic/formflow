@@ -1,11 +1,11 @@
 import SchemaBasedForm from "../Components/SchemaBasedForm";
-import { CheckCircleIcon } from "@heroicons/react/solid";
+import {CheckCircleIcon} from "@heroicons/react/solid";
 import SubmissionHistoryView from "../Components/SubmissionHistoryView";
 
 export function WorkflowView(props) {
   return (
     <>
-      <div className={"md:flex gap-12 flex-1 md:h-full"}>
+      <div className={"md:flex gap-12 flex-1 md:h-full space-y-10 md:space-y-0"}>
         <div className={"flex flex-col"}>
           <div className={"flex-1"}>
             <SchemaBasedForm
