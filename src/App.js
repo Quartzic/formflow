@@ -45,10 +45,12 @@ function preprocessSubmissionsForCSVExport(submissions, metadata) {
 function App() {
 
   const dispatch = useDispatch();
-  const submissions = useSelector((state) => state.present.submissions);
-  const barcodes = useSelector((state) => state.present.barcodes);
-  const metadata = useSelector((state) => state.present.metadata);
-  const workflow = useSelector((state) => state.present.workflow);/*
+  const submissions = useSelector((state) => state.submissions);
+  const barcodes = useSelector((state) => state.barcodes);
+  const metadata = useSelector((state) => state.metadata);
+  const workflow = useSelector((state) => state.workflow);
+
+  /*
   useMousetrap(["ctrl+z", "command+z"], () => {
 
     if(store.getState().past.length > 0) {
