@@ -1,29 +1,53 @@
+import {store} from "../Redux/store";
+import databaseQueueSlice from "../Redux/databaseQueueSlice";
+
 let endpoint = "http://192.168.1.103:3000"
 
-// create a submission cache in localstorage to retry if the server is down
-let submissionCache = localStorage.getItem("submissionCache")
+async function attemptDBWrite(data) {
+    // Try a DB write, timing out if the response takes longer than 2 seconds.
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), 2000)
 
-if (submissionCache) {
-    submissionCache = JSON.parse(submissionCache)
-} else {
-    submissionCache = {}
-}
-
-export async function addSubmissionToDB(submission, metadata) {
-    // POST the data
-    let response = await fetch(`${endpoint}/submissions`, {
+    return fetch(endpoint + "/submissions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json",
+            "Accept": "application/json"
         },
-        body: JSON.stringify({
-            timestamp: new Date().toISOString(),
-            submission: submission,
-            refNumber: metadata.refNumber,
-            workflow: metadata.workflow,
-            username: metadata.username,
-        })});
+        body: JSON.stringify(data),
+        signal: controller.signal
+    }).then(response => {
+        return(response.status === 201)
+    }).catch(() => {
+        return false
+    })
 
-    return response;
 }
+
+export async function addSubmissionToDBOrQueue(submission, metadata) {
+    // convert submission to db schema
+    let data = {
+        timestamp: new Date().toISOString(),
+        submission: submission,
+        refNumber: metadata.refNumber,
+        username: metadata.username,
+        workflow: metadata.workflow
+    }
+    attemptDBWrite(data).then(success => {
+        if (!success) {
+            store.dispatch(databaseQueueSlice.actions.add(data))
+        }
+    })
+}
+
+// every 3 seconds, check the database queue and send any queued requests
+setInterval(() => {
+    let queue = store.getState().databaseQueue;
+    if (queue.length > 0) {
+        attemptDBWrite(queue).then(success => {
+            if (success) {
+                store.dispatch(databaseQueueSlice.actions.clear());
+            }
+        });
+    }
+}, 3000);

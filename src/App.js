@@ -18,7 +18,9 @@ import {toast, ToastContainer} from "react-toastify";
 import React from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import posthog from 'posthog-js';
-import {addSubmissionToDB} from "./Data/postgrest";
+import {addSubmissionToDBOrQueue} from "./Data/postgrest";
+import ConnectionStatus from "./Components/ConnectionStatus";
+import databaseQueueSlice from "./Redux/databaseQueueSlice";
 
 const appVersion = require("../package.json").version;
 
@@ -120,6 +122,7 @@ function App() {
   }
   return (
     <>
+      <ConnectionStatus />
       <PrintModal
         id="print-modal"
         barcodes={barcodes}
@@ -156,13 +159,8 @@ function App() {
               submissionCallback={
                 (submission) => {
                   dispatch(submissionsSlice.actions.add(submission))
-                  addSubmissionToDB(submission, metadata).then((response) => {
-                    if (response.status === 201) {
-                      toast.success("Submission added to database");
-                    } else {
-                      toast.error(`Submission failed to add to database: ${response.statusText}`);
-                    }
-                  })}}
+                  addSubmissionToDBOrQueue(submission, metadata);
+                  }}
               submissions={submissions}
               deleteSubmission={(index) => {
                 dispatch(submissionsSlice.actions.remove(index));
@@ -178,6 +176,7 @@ function App() {
                     dispatch(barcodesSlice.actions.clear());
                     dispatch(metadataSlice.actions.clear());
                     dispatch(workflowSlice.actions.clear());
+                    dispatch(databaseQueueSlice.actions.clear());
                   }
                 });
               }}
