@@ -14,9 +14,9 @@ export class SubmissionHistoryView extends Component {
     return (
         <Transition as={React.Fragment} key={submission['originalIndex']}       appear={true}
                     show={true}
-                    enter="transition origin-center duration-150"
-                    enterFrom="scale-50 opacity-50"
-                    enterTo="scale-100 opacity-100">
+                    enter="transition origin-center duration-500"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100">
       <li className="py-3">
         <div className="flex justify-between rounded-lg">
           <div className="min-w-0 flex-1">
