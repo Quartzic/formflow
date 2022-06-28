@@ -4,7 +4,7 @@ import {TrashIcon} from "@heroicons/react/solid";
 import classNames from "classnames";
 
 export class SubmissionHistoryView extends Component {
-  HistoryItem(submission, index, deleteSubmission) {
+  HistoryItem(submission, index, deleteSubmission, keysToLabelsMap) {
     // Show all keys in the history item, except for the timestamp and original index.
     let shownKeys = Object.keys(submission).filter(
       (key) => key !== "timestamp" && key !== "originalIndex"
@@ -20,7 +20,9 @@ export class SubmissionHistoryView extends Component {
                   return (
                     <li key={index}>
                       <p className="text-sm font-semibold text-gray-900 inline">
-                        {shownKeys.length > 1 && `${key}: `}
+                        {shownKeys.length > 1 && `${
+                            keysToLabelsMap[key] || key
+                        }: `}
                       </p>
                       <p
                         className={classNames(
@@ -80,6 +82,7 @@ export class SubmissionHistoryView extends Component {
     let submissionsToDisplay = submissions.reverse();
 
     if (submissionsToDisplay.length > 0) {
+
       return (
         <>
           { !this.props.compact && <h1 className={"text-lg font-bold"}>
@@ -89,7 +92,7 @@ export class SubmissionHistoryView extends Component {
             {submissionsToDisplay.map((submission, index) =>
               this.HistoryItem(submission, index, () => {
                 this.props.deleteSubmission(submission.originalIndex);
-              })
+              }, this.props.keysToLabelsMap)
             )}
           </ul>
         </>
