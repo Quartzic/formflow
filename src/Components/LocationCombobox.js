@@ -52,7 +52,7 @@ export const LocationCombobox = ({field, form, ...props}) => {
                       leaveTo="transform scale-95 opacity-0"
                   >
               <Combobox.Options className={"absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"}>
-              {filteredOptions.map((option) => (
+                  {filteredOptions.length > 0 ? filteredOptions.map((option) => (
                   <Combobox.Option key={option.position} value={option.position} className={({ active }) =>
                       classNames(
                           "relative cursor-default select-none py-2 pl-3 pr-9",
@@ -61,7 +61,7 @@ export const LocationCombobox = ({field, form, ...props}) => {
                   }>
                       {option.position}
                   </Combobox.Option>
-              ))}
+              )) : <div className={"text-center m-2"}>No results</div>}
               </Combobox.Options>
                   </Transition>
           </div>
