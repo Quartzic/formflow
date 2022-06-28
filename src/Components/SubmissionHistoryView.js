@@ -1,7 +1,8 @@
-import {Component} from "react";
+import React, {Component} from "react";
 import ReactTimeAgo from "react-time-ago";
 import {TrashIcon} from "@heroicons/react/solid";
 import classNames from "classnames";
+import {Transition} from "@headlessui/react";
 
 export class SubmissionHistoryView extends Component {
   HistoryItem(submission, index, deleteSubmission, keysToLabelsMap) {
@@ -11,8 +12,13 @@ export class SubmissionHistoryView extends Component {
     );
 
     return (
-      <li className="py-3" key={index}>
-        <div className="flex justify-between">
+        <Transition as={React.Fragment} key={submission['originalIndex']}       appear={true}
+                    show={true}
+                    enter="transition origin-center duration-150"
+                    enterFrom="scale-50 opacity-50"
+                    enterTo="scale-100 opacity-100">
+      <li className="py-3">
+        <div className="flex justify-between rounded-lg">
           <div className="min-w-0 flex-1">
             <ul>
               {shownKeys.length > 1 ? (
@@ -62,13 +68,14 @@ export class SubmissionHistoryView extends Component {
             </h3>
             <button
               onClick={deleteSubmission}
-              className={"float-right bg-red-500 rounded shadow px-2 py-1"}
+              className={"float-right bg-red-500 rounded shadow px-2 py-1 hover:bg-red-600 hover:scale-105 hover:shadow-md transition-all"}
             >
               <TrashIcon className={"text-white"} width={16} />
             </button>
           </div>
         </div>
       </li>
+        </Transition>
     );
   }
 

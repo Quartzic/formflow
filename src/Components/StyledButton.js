@@ -21,7 +21,7 @@ function StyledButton(props) {
     <button
       type="button"
       className={classNames(
-        "mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm p-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+        "mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm p-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 hover:shadow-lg transition-all",
         propDerivedClasses
       )}
       onClick={props.onClick}

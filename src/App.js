@@ -21,6 +21,7 @@ import posthog from 'posthog-js';
 import {addSubmissionToDBOrQueue} from "./Data/postgrest";
 import ConnectionStatus from "./Components/ConnectionStatus";
 import databaseQueueSlice from "./Redux/databaseQueueSlice";
+import classNames from "classnames";
 
 const appVersion = require("../package.json").version;
 
@@ -146,16 +147,13 @@ function App() {
           "flex flex-col items-center md:justify-center p-5 md:h-screen w-full max-h-screen"
         }
       >
-        <img src={lockup} className="w-64 pointer-events-none" alt={"Formflow logo"} />
-        {(metadata && workflow) && (
-          <h1 className={"font-bold text-xl text-center mt-3"}>
-            {workflow.name} - ref. {metadata.refNumber}
-          </h1>
-        )}
-        {metadata && workflow ? (
-          <div className="p-4 w-full max-w-4xl shadow-lg m-4 rounded-lg flex-1 md:h-0">
+        <img src={lockup} className="w-52 pointer-events-none" alt={"Formflow logo"}  />
+          <div className={classNames("p-4 w-full shadow-lg m-4 rounded-lg", (metadata && workflow) ? "max-w-4xl md:h-0 flex-1" : "max-w-lg")}>
+
+            {metadata && workflow ? (
             <WorkflowView
               workflow={workflow}
+              metadata={metadata}
               submissionCallback={
                 (submission) => {
                   dispatch(submissionsSlice.actions.add(submission))
@@ -181,10 +179,9 @@ function App() {
                 });
               }}
             />
-          </div>
-        ) : (
-          <div className="p-4 w-full max-w-lg shadow-lg m-4 rounded-lg">
-            {setupView(
+
+            ) : (
+            setupView(
               createSetupFormFields(WorkflowTemplates),
               WorkflowTemplates,
               (metadata)  => {
@@ -194,16 +191,16 @@ function App() {
                 (workflow)  => {
                   dispatch(workflowSlice.actions.set(workflow));
                 },
-            )}
-          </div>
+            )
         )}
+          </div>
         <div className="sm:flex justify-center items-end">
           <button
             onClick={() => {
               NiceModal.show("print-modal");
             }}
             type="button"
-            className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:scale-105 hover:shadow-md transition-all"
           >
             <PrinterIcon width={20} className="mr-1" />
             Print barcodes

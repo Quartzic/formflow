@@ -110,7 +110,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
             props.fields.map((field, index) => {
               // Check if there are errors for this field—if so, highlight the field in red. We also apply ph-no-capture to the field so that PostHog won't get sensitive info.
               let formFieldClass =
-                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full ph-no-capture";
+                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full ph-no-capture transition-colors duration-150";
 
               if (field.type === "checkbox-group") {
                 // Checkbox groups have many options, and each element within them should be spaced out.
@@ -272,7 +272,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
 
           <button
             type="submit"
-            className="px-4 py-2 cursor-pointer md font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700"
+            className="px-4 py-2 cursor-pointer md font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all"
           >
             Submit
           </button>
