@@ -6,7 +6,7 @@ function StyledButton(props) {
   switch (props.role) {
     case "danger":
       propDerivedClasses = classNames(
-        "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+        "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500",
         propDerivedClasses
       );
       break;
