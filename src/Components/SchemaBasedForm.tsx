@@ -3,6 +3,8 @@ import React, {useRef} from "react";
 import classNames from "classnames";
 // @ts-ignore
 import levenshtein from "fast-levenshtein";
+// @ts-ignore
+import {LocationCombobox} from "./LocationCombobox";
 
 interface MagicSchema {
   args: string[]
@@ -251,6 +253,18 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                       ))}
                     </div>
                   </div>
+                );
+              }else if(field.type === "location-combobox") {
+                return (
+                    <div key={index}>
+                      <label
+                          htmlFor={field.id}
+                          className="block text-md font-bold text-gray-700"
+                      >
+                        {field.label}
+                      </label>
+                      <Field name={field.id} component={LocationCombobox} submitFormIfLast={submitForm} />
+                    </div>
                 );
               }
             })

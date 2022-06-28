@@ -217,7 +217,7 @@ let WorkflowTemplates = [
       {
         id: "location",
         label: "Location",
-        type: "text",
+        type: "location-combobox",
         initialValue: "",
         placeholder: "",
       },
