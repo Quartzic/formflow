@@ -5,13 +5,7 @@ import {Dialog} from "@headlessui/react";
 import PrintModalView from "./PrintModalView";
 
 export default NiceModal.create(
-  ({
-    barcodes,
-    addBarcode,
-    removeBarcode,
-    clearAllBarcodes,
-    exportBarcodesAsCSV,
-  }) => {
+  () => {
     const modal = useModal();
 
     return (
@@ -23,13 +17,7 @@ export default NiceModal.create(
           }}
         >
           <Dialog.Panel className="relative bg-white rounded-lg p-4 text-left w-full overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:p-6">
-            <PrintModalView
-              barcodes={barcodes}
-              addBarcode={addBarcode}
-              removeBarcode={removeBarcode}
-              clearAllBarcodes={clearAllBarcodes}
-              exportBarcodesAsCSV={exportBarcodesAsCSV}
-            />
+            <PrintModalView/>
           </Dialog.Panel>
         </ModalWrapper>
       </>

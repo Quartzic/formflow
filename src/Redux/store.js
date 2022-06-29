@@ -3,7 +3,6 @@ import {FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE,} from
 import storage from 'redux-persist/lib/storage'
 import submissionsSlice from "./submissionsSlice";
 import hardSet from "redux-persist/es/stateReconciler/hardSet";
-import barcodesSlice from "./barcodesSlice";
 import workflowSlice from "./workflowSlice";
 import metadataSlice from "./metadataSlice";
 import * as Sentry from "@sentry/react";
@@ -24,7 +23,6 @@ const sentryReduxEnhancer = Sentry.createReduxEnhancer({
         return {
             ...state,
             submissions: null,
-            barcodes: null
         };
 
     },
@@ -32,7 +30,6 @@ const sentryReduxEnhancer = Sentry.createReduxEnhancer({
 
 export const reducers = combineReducers({
     submissions: submissionsSlice.reducer,
-    barcodes: barcodesSlice.reducer,
     workflow: workflowSlice.reducer,
     metadata: metadataSlice.reducer,
     databaseQueue: databaseQueueSlice.reducer

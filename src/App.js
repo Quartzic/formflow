@@ -10,7 +10,6 @@ import {createSetupFormFields} from "./Data/SetupFormTemplate";
 import WorkflowTemplates from "./Data/WorkflowTemplates";
 import {useDispatch, useSelector} from "react-redux";
 import submissionsSlice from "./Redux/submissionsSlice";
-import barcodesSlice from "./Redux/barcodesSlice";
 import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
 import * as Sentry from "@sentry/react";
@@ -44,11 +43,20 @@ function preprocessSubmissionsForCSVExport(submissions, metadata) {
   });
 }
 
+export function downloadCSV(csv, title) {
+  let blob = new Blob([csv], { type: "text/csv" });
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = `${new Date().toISOString()}_${title}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function App() {
 
   const dispatch = useDispatch();
   const submissions = useSelector((state) => state.submissions);
-  const barcodes = useSelector((state) => state.barcodes);
   const metadata = useSelector((state) => state.metadata);
   const workflow = useSelector((state) => state.workflow);
 
@@ -85,16 +93,6 @@ function App() {
   });
 */
 
-  function downloadCSV(csv, title) {
-    let blob = new Blob([csv], { type: "text/csv" });
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = `${new Date().toISOString()}_${title}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   function exportSubmissionsAsCSV(submissions, metadata) {
     // We need to apply metadata to the submissionsSlice
     let results = preprocessSubmissionsForCSVExport(submissions, metadata);
@@ -107,7 +105,7 @@ function App() {
 
   }
 
-  function exportBarcodesAsCSV(submissions) {
+/*   function exportBarcodesAsCSV(submissions) {
     let barcodes = [
       [
         // add a stringified representation of the metadata as the first element in the CSV
@@ -119,27 +117,12 @@ function App() {
     ];
     downloadCSV(Papa.unparse(barcodes), "barcodes");
 
-  }
+  }*/
   return (
     <>
       <ConnectionStatus />
       <PrintModal
         id="print-modal"
-        barcodes={barcodes}
-        addBarcode={(barcode) => {
-          dispatch(barcodesSlice.actions.add(barcode));
-        }
-        }
-        removeBarcode={(barcode) => {
-          dispatch(barcodesSlice.actions.remove(barcode));
-        }
-        }
-        clearAllBarcodes={() => {
-          dispatch(barcodesSlice.actions.clear());}
-        }
-        exportBarcodesAsCSV={() => {
-          exportBarcodesAsCSV(barcodes);
-        }}
       />
       <div
         className={
@@ -166,11 +149,10 @@ function App() {
                 exportSubmissionsAsCSV(submissions, metadata);
                 NiceModal.show(ConfirmModal, {
                   title: "Are you sure?",
-                  message: `This will clear ${submissions.length} submissions and ${barcodes.length} barcodes, and reset the application to its original state. Make sure you've downloaded your work first.`,
+                  message: `This will clear ${submissions.length} submissions and reset the application to its original state. Make sure you've downloaded your work first.`,
                   action: "End job",
                   onAction: () => {
                     dispatch(submissionsSlice.actions.clear());
-                    dispatch(barcodesSlice.actions.clear());
                     dispatch(metadataSlice.actions.clear());
                     dispatch(workflowSlice.actions.clear());
                     // dispatch(databaseQueueSlice.actions.clear());
