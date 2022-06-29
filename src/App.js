@@ -14,13 +14,12 @@ import barcodesSlice from "./Redux/barcodesSlice";
 import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
 import * as Sentry from "@sentry/react";
-import {toast, ToastContainer} from "react-toastify";
+import {ToastContainer} from "react-toastify";
 import React from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import posthog from 'posthog-js';
 import {addSubmissionToDBOrQueue} from "./Data/postgrest";
 import ConnectionStatus from "./Components/ConnectionStatus";
-import databaseQueueSlice from "./Redux/databaseQueueSlice";
 import classNames from "classnames";
 
 const appVersion = require("../package.json").version;
@@ -174,7 +173,7 @@ function App() {
                     dispatch(barcodesSlice.actions.clear());
                     dispatch(metadataSlice.actions.clear());
                     dispatch(workflowSlice.actions.clear());
-                    dispatch(databaseQueueSlice.actions.clear());
+                    // dispatch(databaseQueueSlice.actions.clear());
                   }
                 });
               }}
