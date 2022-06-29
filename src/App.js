@@ -90,7 +90,7 @@ function App() {
     let url = URL.createObjectURL(blob);
     let a = document.createElement("a");
     a.href = url;
-    a.download = `${title}_${new Date().toISOString()}.csv`;
+    a.download = `${new Date().toISOString()}_${title}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -102,7 +102,7 @@ function App() {
     // export results as CSV
     downloadCSV(
       Papa.unparse(results),
-      `${metadata.username}_${metadata.refNumber}_${metadata.workflow}`
+      `${metadata.refNumber}_${metadata.workflow}_${metadata.username}`
     );
 
   }
