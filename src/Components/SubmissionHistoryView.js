@@ -35,7 +35,7 @@ export class SubmissionHistoryView extends Component {
                     <div className={classNames("flex justify-between rounded-lg gap-6 p-3 relative", submissionColor)}>
                         <button
                             onClick={deleteSubmission}
-                            className={"absolute -right-2 -top-2 bg-gray-500 rounded-full p-1 shadow-lg rounded hover:bg-red-500 hover:scale-125 transition-all"}
+                            className={"absolute -right-2 -top-2 bg-gray-500 rounded-lg p-1 shadow-lg hover:bg-red-500 hover:scale-125 transition-all"}
                         >
                             <XIcon className={"text-white"} width={18}/>
                         </button>

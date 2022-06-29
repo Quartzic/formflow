@@ -129,7 +129,7 @@ function App() {
           "flex flex-col items-center md:justify-center p-5 md:h-screen w-full max-h-screen"
         }
       >
-        <img src={lockup} className="w-52 pointer-events-none" alt={"Formflow logo"}  />
+        <img src={lockup} className="w-52 pointer-events-none" alt={`Formflow ${appVersion}`}  />
           <div className={classNames("p-4 w-full shadow-lg m-4 rounded-lg", (metadata && workflow) ? "max-w-4xl md:h-0 flex-1" : "max-w-lg")}>
 
             {metadata && workflow ? (
@@ -187,9 +187,6 @@ function App() {
             Print barcodes
           </button>
         </div>
-        <p className={"text-xs text-gray-500 mt-3"}>
-          {appVersion}
-        </p>
       </div>
 
       <ToastContainer position="top-right"
