@@ -1,136 +1,7 @@
 let WorkflowTemplates = [
-  /* {
-    name: "Inbound",
-    id: "inbound",
-    submissionFields: [
-      {
-        id: "sku",
-        label: "SKU",
-        type: "text",
-        initialValue: "",
-        placeholder: "64543543",
-      },
-      {
-        id: "quantity",
-        label: "Quantity",
-        type: "number",
-        initialValue: "1",
-        placeholder: "",
-      },
-      {
-        id: "location",
-        label: "Location",
-        type: "text",
-        initialValue: "",
-        placeholder: "1A3B5C",
-      },
-    ],
-  },
   {
-    name: "Outbound",
-    id: "outbound",
-    submissionFields: [
-      {
-        id: "sku",
-        label: "SKU",
-        type: "text",
-        initialValue: "",
-        placeholder: "64543543",
-      },
-      {
-        id: "quantity",
-        label: "Quantity",
-        type: "number",
-        initialValue: "1",
-        placeholder: "",
-      },
-      {
-        id: "location",
-        label: "Location",
-        type: "text",
-        initialValue: "",
-        placeholder: "1A3B5C",
-      },
-    ],
-  },
-  {
-    name: "Put Away",
-    id: "putaway",
-    submissionFields: [
-      {
-        id: "sku",
-        label: "SKU",
-        type: "text",
-        initialValue: "",
-        placeholder: "64543543",
-      },
-      {
-        id: "quantity",
-        label: "Quantity",
-        type: "number",
-        initialValue: "1",
-        placeholder: "",
-      },
-      {
-        id: "location",
-        label: "Location",
-        type: "text",
-        initialValue: "",
-        placeholder: "1A3B5C",
-      },
-    ],
-  },
-  {
-    name: "Pick",
-    id: "pick",
-    submissionFields: [
-      {
-        id: "sku",
-        label: "SKU",
-        type: "text",
-        initialValue: "",
-        placeholder: "64543543",
-      },
-      {
-        id: "quantity",
-        label: "Quantity",
-        type: "number",
-        initialValue: "1",
-        placeholder: "",
-      },
-      {
-        id: "location",
-        label: "Location",
-        type: "text",
-        initialValue: "",
-        placeholder: "1A3B5C",
-      },
-    ],
-  },
-  {
-    name: "SKU & Location",
-    id: "skuloc",
-    submissionFields: [
-      {
-        id: "sku",
-        label: "SKU",
-        type: "text",
-        initialValue: "",
-        placeholder: "64543543",
-      },
-      {
-        id: "location",
-        label: "Location",
-        type: "text",
-        initialValue: "",
-        placeholder: "1A3B5C",
-      },
-    ],
-  },
-  */
-  {
-    name: "Validation",
-    id: "validation",
+    name: "Exact Validation",
+    id: "exact-validation",
     submissionFields: [
       {
         id: "sku1",
@@ -158,10 +29,9 @@ let WorkflowTemplates = [
       },
     ],
   },
-
   {
-    name: "Validation with Levenshtein",
-    id: "validation-lv",
+    name: "Approximate Validation",
+    id: "approx-validation",
     submissionFields: [
       {
         id: "sku1",
@@ -190,8 +60,8 @@ let WorkflowTemplates = [
     ],
   },
   {
-    name: "Inventory",
-    id: "inventory",
+    name: "Inventory / Put Away",
+    id: "inventory-putaway",
     submissionFields: [
       {
         id: "sku",
@@ -215,9 +85,19 @@ let WorkflowTemplates = [
         placeholder: "",
       },
       {
+        id: "totalunits",
+        label: "Total Units",
+        type: "number",
+        magic: {
+            type: "multiply",
+            args: ["unitspercarton", "cartons"],
+        },
+        hidden: true
+      },
+      {
         id: "location",
         label: "Location",
-        type: "text",
+        type: "location-combobox",
         initialValue: "",
         placeholder: "",
       },
@@ -225,7 +105,7 @@ let WorkflowTemplates = [
   },
   {
     name: "SKU & Location",
-    id: "skuloc",
+    id: "sku-loc",
     submissionFields: [
       {
         id: "sku",
@@ -245,7 +125,7 @@ let WorkflowTemplates = [
   },
   {
     name: "LPN & Location",
-    id: "lpnloc",
+    id: "lpn-loc",
     submissionFields: [
       {
         id: "lpn",

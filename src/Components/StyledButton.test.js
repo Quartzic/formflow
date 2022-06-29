@@ -27,6 +27,6 @@ describe('StyledButton', () => {
     it('is colored red with danger role', async () => {
         render(<StyledButton role="danger"/>)
         await screen.findByRole('button');
-        expect(screen.getByRole('button')).toHaveClass('bg-red-600');
+        expect(screen.getByRole('button')).toHaveClass('bg-red-500');
     });
 });

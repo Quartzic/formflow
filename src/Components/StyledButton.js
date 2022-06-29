@@ -6,7 +6,7 @@ function StyledButton(props) {
   switch (props.role) {
     case "danger":
       propDerivedClasses = classNames(
-        "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+        "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500",
         propDerivedClasses
       );
       break;
@@ -21,7 +21,7 @@ function StyledButton(props) {
     <button
       type="button"
       className={classNames(
-        "mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
+        "mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm p-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-105 hover:shadow-lg transition-all",
         propDerivedClasses
       )}
       onClick={props.onClick}

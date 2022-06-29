@@ -3,6 +3,8 @@ import React, {useRef} from "react";
 import classNames from "classnames";
 // @ts-ignore
 import levenshtein from "fast-levenshtein";
+// @ts-ignore
+import {LocationCombobox} from "./LocationCombobox";
 
 interface MagicSchema {
   args: string[]
@@ -18,6 +20,7 @@ interface FieldSchema {
     initialValue?: any
     placeholder?: string
     magic?: MagicSchema
+  hidden?: boolean
 }
 export function evaluateMagicField(field: { magic: MagicSchema, id: string }, values: FormikValues) {
   // Check that all expected arguments have a value in the values array; otherwise, throw an error.
@@ -50,6 +53,9 @@ export function evaluateMagicField(field: { magic: MagicSchema, id: string }, va
       } else {
         return true;
       }
+    case "multiply":
+        // Multiply expects two arguments and returns the product of them.
+        return values[field.magic.args[0]] * values[field.magic.args[1]];
     default:
       throw new Error(
         `Unknown magic type: ${field.magic.type} in field ${field.id}`
@@ -108,7 +114,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
             props.fields.map((field, index) => {
               // Check if there are errors for this field—if so, highlight the field in red. We also apply ph-no-capture to the field so that PostHog won't get sensitive info.
               let formFieldClass =
-                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full ph-no-capture";
+                "rounded-lg border border-gray-200 border-2 block py-2 px-3 text-md mt-1 w-full ph-no-capture transition-colors duration-150";
 
               if (field.type === "checkbox-group") {
                 // Checkbox groups have many options, and each element within them should be spaced out.
@@ -166,7 +172,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                   <div key={index}>
                     <label
                       htmlFor={field.id}
-                      className="block text-md font-bold text-gray-700"
+                      className={classNames("block text-md font-bold text-gray-700", field.hidden && "hidden")}
                     >
                       {field.label}
                       <div className={"flex"}>
@@ -252,13 +258,25 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                     </div>
                   </div>
                 );
+              }else if(field.type === "location-combobox") {
+                return (
+                    <div key={index}>
+                      <label
+                          htmlFor={field.id}
+                          className="block text-md font-bold text-gray-700"
+                      >
+                        {field.label}
+                      </label>
+                      <Field name={field.id} component={LocationCombobox} submitFormIfLast={submitForm} />
+                    </div>
+                );
               }
             })
           }
 
           <button
             type="submit"
-            className="px-4 py-2 cursor-pointer md font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700"
+            className="px-4 py-2 cursor-pointer md font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all"
           >
             Submit
           </button>
