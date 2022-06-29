@@ -20,6 +20,7 @@ interface FieldSchema {
     initialValue?: any
     placeholder?: string
     magic?: MagicSchema
+  hidden?: boolean
 }
 export function evaluateMagicField(field: { magic: MagicSchema, id: string }, values: FormikValues) {
   // Check that all expected arguments have a value in the values array; otherwise, throw an error.
@@ -52,6 +53,9 @@ export function evaluateMagicField(field: { magic: MagicSchema, id: string }, va
       } else {
         return true;
       }
+    case "multiply":
+        // Multiply expects two arguments and returns the product of them.
+        return values[field.magic.args[0]] * values[field.magic.args[1]];
     default:
       throw new Error(
         `Unknown magic type: ${field.magic.type} in field ${field.id}`
@@ -168,7 +172,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                   <div key={index}>
                     <label
                       htmlFor={field.id}
-                      className="block text-md font-bold text-gray-700"
+                      className={classNames("block text-md font-bold text-gray-700", field.hidden && "hidden")}
                     >
                       {field.label}
                       <div className={"flex"}>

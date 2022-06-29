@@ -215,6 +215,16 @@ let WorkflowTemplates = [
         placeholder: "",
       },
       {
+        id: "totalunits",
+        label: "Total Units",
+        type: "number",
+        magic: {
+            type: "multiply",
+            args: ["unitspercarton", "cartons"],
+        },
+        hidden: true
+      },
+      {
         id: "location",
         label: "Location",
         type: "location-combobox",
