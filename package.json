@@ -49,6 +49,9 @@
     "appId": "co.quartzic.formflow",
     "productName": "Formflow",
     "copyright": "Copyright © 2022 Nathan Goller-Deitsch",
+    "nsis": {
+      "include": "build/installer.nsh"
+    },
     "mac": {
       "icon": "./assets/icon.icns"
     },
