@@ -17,8 +17,8 @@ class PrintModalView extends Component {
                                 initialValue: "",
                             },
                             {
-                                id: "copies",
-                                label: "Copies",
+                                id: "labelCount",
+                                label: "Label Count",
                                 type: "number",
                                 initialValue: "1",
                             }
@@ -26,11 +26,11 @@ class PrintModalView extends Component {
                         submissionCallback={(submission) => {
                             let barcodes = [
                                 [
-                                    submission.copies,
+                                    submission.labelCount,
                                     submission.data
                                 ],
                             ];
-                            downloadCSV(Papa.unparse(barcodes), "barcodes");
+                            downloadCSV(Papa.unparse(barcodes), "barcode");
                         }}
                     />
                 </div>
