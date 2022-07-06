@@ -2,13 +2,13 @@ import {combineReducers, configureStore} from '@reduxjs/toolkit'
 import {FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE,} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import submissionsSlice from "./submissionsSlice";
-import hardSet from "redux-persist/es/stateReconciler/hardSet";
 import workflowSlice from "./workflowSlice";
 import metadataSlice from "./metadataSlice";
 import * as Sentry from "@sentry/react";
 import posthogMiddleware from "./posthogMiddleware";
 import databaseQueueSlice from "./databaseQueueSlice";
 import settingsSlice from "./settingsSlice";
+import autoMergeLevel1 from "redux-persist/es/stateReconciler/autoMergeLevel1";
 // ...
 
 const sentryReduxEnhancer = Sentry.createReduxEnhancer({
@@ -39,7 +39,7 @@ export const reducers = combineReducers({
 const persistedRootReducer = persistReducer({
     key: 'root',
     storage,
-    stateReconciler: hardSet,
+    stateReconciler: autoMergeLevel1,
 }, reducers);
 
 export const store = configureStore({
