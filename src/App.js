@@ -44,14 +44,8 @@ function preprocessSubmissionsForCSVExport(submissions, metadata) {
   });
 }
 
-export function downloadCSV(csv, title) {
-  let blob = new Blob([csv], { type: "text/csv" });
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = `${new Date().toISOString()}_${title}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+export async function downloadFile(path, data) {
+  return window.electronAPI.saveFile(path, data);
 }
 
 function App() {
@@ -96,14 +90,14 @@ function App() {
   });
 */
 
-  function exportSubmissionsAsCSV(submissions, metadata) {
+  async function exportSubmissionsAsCSV(submissions, metadata, location) {
     // We need to apply metadata to the submissionsSlice
     let results = preprocessSubmissionsForCSVExport(submissions, metadata);
 
     // export results as CSV
-    downloadCSV(
-      Papa.unparse(results),
-      `${metadata.refNumber}_${metadata.workflow}_${metadata.username}`
+    return downloadFile(
+        `${location}/${new Date().toISOString().replaceAll('/', '-').replaceAll(':', '-')}_${metadata.refNumber}_${metadata.workflow}_${metadata.username}.csv`,
+      Papa.unparse(results)
     );
 
   }
@@ -118,7 +112,7 @@ function App() {
         }),
       ],
     ];
-    downloadCSV(Papa.unparse(barcodes), "barcodes");
+    downloadFile(Papa.unparse(barcodes), "barcodes");
 
   }*/
   return (
@@ -152,18 +146,25 @@ function App() {
                 dispatch(submissionsSlice.actions.remove(index));
               }}
               onClick={() => {
-                exportSubmissionsAsCSV(submissions, metadata);
-                NiceModal.show(ConfirmModal, {
-                  title: "Are you sure?",
-                  message: `This will clear ${submissions.length} submissions and reset the application to its original state. Make sure you've downloaded your work first.`,
-                  action: "End job",
-                  onAction: () => {
-                    dispatch(submissionsSlice.actions.clear());
-                    dispatch(metadataSlice.actions.clear());
-                    dispatch(workflowSlice.actions.clear());
-                    // dispatch(databaseQueueSlice.actions.clear());
+                exportSubmissionsAsCSV(submissions, metadata, settings.workflowSaveLocation).then( (result) =>
+                  {
+                      if (result) {
+                          NiceModal.show(ConfirmModal, {
+                              title: "Submissions exported successfully",
+                              message: `Saved ${submissions.length} submissions to ${settings.workflowSaveLocation}`,
+                              action: "End job",
+                              onAction: () => {
+                                  dispatch(submissionsSlice.actions.clear());
+                                  dispatch(metadataSlice.actions.clear());
+                                  dispatch(workflowSlice.actions.clear());
+                                  // dispatch(databaseQueueSlice.actions.clear());
+                              }
+                          });
+                      } else {
+                          alert("Something went wrong saving your work.");
+                      }
                   }
-                });
+                );
               }}
             />
 

@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import SchemaBasedForm from "../SchemaBasedForm";
-import {downloadCSV} from "../../App";
+import {downloadFile} from "../../App";
 import Papa from "papaparse";
 
 class PrintModalView extends Component {
@@ -30,7 +30,12 @@ class PrintModalView extends Component {
                                     submission.data
                                 ],
                             ];
-                            downloadCSV(Papa.unparse(barcodes), "barcode");
+                            downloadFile( `/Users/nathan/Downloads/${new Date().toISOString().replaceAll('/', '-').replaceAll(':', '-')}_barcodes.csv`, Papa.unparse(barcodes)).then(
+                                (result) => {
+                                    if(!result){
+                                        alert("Something went wrong exporting barcodes.");
+                                    }
+                                });
                         }}
                     />
                 </div>

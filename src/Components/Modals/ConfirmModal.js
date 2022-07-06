@@ -1,8 +1,8 @@
-import {ExclamationIcon} from "@heroicons/react/outline";
 import {Dialog} from "@headlessui/react";
 import NiceModal, {useModal} from "@ebay/nice-modal-react";
 import React from "react";
 import ModalWrapper from "./ModalWrapper";
+import {CheckIcon} from "@heroicons/react/solid";
 
 export default NiceModal.create(({ title, message, action, onAction }) => {
   const modal = useModal();
@@ -17,9 +17,9 @@ export default NiceModal.create(({ title, message, action, onAction }) => {
       >
         <Dialog.Panel className="relative bg-white rounded-lg p-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">
           <div className="sm:flex sm:items-start">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-              <ExclamationIcon
-                className="h-6 w-6 text-red-600"
+            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+              <CheckIcon
+                className="h-6 w-6 text-green-600"
                 aria-hidden="true"
               />
             </div>
@@ -38,7 +38,7 @@ export default NiceModal.create(({ title, message, action, onAction }) => {
           <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
             <button
               type="button"
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm hover:scale-105 hover:shadow-md transition-all"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm hover:scale-105 hover:shadow-md transition-all"
               onClick={() => {
                 onAction();
                 modal.hide();

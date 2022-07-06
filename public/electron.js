@@ -95,9 +95,29 @@ app.whenReady().then(() => {
     return result.filePaths[0];
   });
 
-  ipcMain.handle('saveFile', async(event, arg) => {
-    // save given file to given path without user confirmation using fs
+  ipcMain.handle('saveFile', async(event, args) => {
+    // check if file exists
+    let fileExists = jetpack.exists(args[0]);
 
+    // break if the file exists already and the user doesn't want to overwrite it
+    if(fileExists){
+        let result = await dialog.showMessageBox({
+            type: 'warning',
+            title: 'File already exists',
+            message: `A file already exists at ${args[0]}. Do you want to overwrite it?`,
+            buttons: ['Yes', 'No']
+        });
+        if(result.response === 1){
+            return false;
+        }
+    }
+
+    // write the file
+    jetpack.write(args[0], args[1]);
+
+    // check if file was saved successfully
+    let fileSavedSuccess = (jetpack.exists(args[0]) === "file");
+    return fileSavedSuccess;
   });
 
   const log = require("electron-log")
