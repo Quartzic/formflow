@@ -143,6 +143,26 @@ let WorkflowTemplates = [
       },
     ],
   },
+  {
+    name: "On Hand & Container",
+    id: "onhand-container",
+    submissionFields: [
+      {
+        id: "onhand",
+        label: "On Hand",
+        type: "text",
+        initialValue: "",
+        placeholder: "",
+      },
+      {
+        id: "container",
+        label: "Container",
+        type: "text",
+        initialValue: "",
+        placeholder: "",
+      },
+    ],
+  },
 ];
 
 export default WorkflowTemplates;
