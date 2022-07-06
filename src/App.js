@@ -1,6 +1,6 @@
 import NiceModal from "@ebay/nice-modal-react";
 import PrintModal from "./Components/Modals/PrintModal";
-import {PrinterIcon} from "@heroicons/react/solid";
+import {CogIcon, PrinterIcon} from "@heroicons/react/solid";
 import ConfirmModal from "./Components/Modals/ConfirmModal";
 import {WorkflowView} from "./Views/WorkflowView";
 import Papa from "papaparse";
@@ -20,6 +20,7 @@ import posthog from 'posthog-js';
 import {addSubmissionToDBOrQueue} from "./Data/postgrest";
 import ConnectionStatus from "./Components/ConnectionStatus";
 import classNames from "classnames";
+import SettingsModal from "./Components/Modals/SettingsModal";
 
 const appVersion = require("../package.json").version;
 
@@ -126,6 +127,9 @@ function App() {
       <PrintModal
         id="print-modal"
       />
+      <SettingsModal
+        id="settings-modal"
+        />
       <div
         className={
           "flex flex-col items-center md:justify-center p-5 md:h-screen w-full max-h-screen"
@@ -187,6 +191,16 @@ function App() {
           >
             <PrinterIcon width={20} className="mr-1" />
             Print barcodes
+          </button>
+          <button
+              onClick={() => {
+                NiceModal.show("settings-modal");
+              }}
+              type="button"
+              className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:scale-105 hover:shadow-md transition-all"
+          >
+            <CogIcon width={20} className="mr-1" />
+            Settings
           </button>
         </div>
       </div>
