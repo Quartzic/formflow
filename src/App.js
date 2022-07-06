@@ -14,7 +14,7 @@ import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
 import * as Sentry from "@sentry/react";
 import {ToastContainer} from "react-toastify";
-import React from "react";
+import React, {useEffect} from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import posthog from 'posthog-js';
 import {addSubmissionToDBOrQueue} from "./Data/postgrest";
@@ -55,7 +55,11 @@ function App() {
   const metadata = useSelector((state) => state.metadata);
   const workflow = useSelector((state) => state.workflow);
   const settings = useSelector((state) => state.settings);
-
+  useEffect(() => {
+      if(!settings.workflowSaveLocation || !settings.barcodeSaveLocation) {
+          NiceModal.show("settings-modal");
+      }
+  }, []);
 
   /*
   useMousetrap(["ctrl+z", "command+z"], () => {

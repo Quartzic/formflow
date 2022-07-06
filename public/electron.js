@@ -113,7 +113,11 @@ app.whenReady().then(() => {
     }
 
     // write the file
-    jetpack.write(args[0], args[1]);
+    try {
+      jetpack.write(args[0], args[1]);
+    }catch(e){
+      return false;
+    }
 
     // check if file was saved successfully
     let fileSavedSuccess = (jetpack.exists(args[0]) === "file");

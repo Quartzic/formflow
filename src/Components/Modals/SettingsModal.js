@@ -4,9 +4,11 @@ import React from "react";
 import ModalWrapper from "./ModalWrapper";
 import {useDispatch, useSelector} from "react-redux";
 import settingsSlice from "../../Redux/settingsSlice";
+import classNames from "classnames";
+import {XIcon} from "@heroicons/react/solid";
 
 function SettingsItem(props) {
-    return <div className="rounded-md bg-gray-50 px-6 py-5 flex items-start sm:justify-between">
+    return <div className={classNames("rounded-md bg-gray-50 px-6 py-5 flex items-start sm:justify-between", props.value ? "bg-gray-50" : "bg-red-50")}>
         <div className="flex items-start ">
             <div className="mt-0">
                 <div className="text-sm font-medium text-gray-900">{props.title}</div>
@@ -28,20 +30,31 @@ function SettingsItem(props) {
 }
 
 export default NiceModal.create(() => {
-  const modal = useModal();
-  const settings = useSelector((state) => state.settings);
-  const dispatch = useDispatch();
+    const modal = useModal();
+    const settings = useSelector((state) => state.settings);
+    const dispatch = useDispatch();
+    const closable = settings.barcodeSaveLocation && settings.workflowSaveLocation
   return (
     <>
         <ModalWrapper
             visible={modal.visible}
-            hideModal={() => {
-                modal.hide();
-            }}
+            hideModal={() => {if(closable) {
+                    modal.hide();
+                }}
+            }
         >
             <Dialog.Panel
-                className="relative bg-white rounded-lg p-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-xl sm:w-full sm:p-6">
-
+                className="relative bg-white rounded-lg p-4 text-left shadow-xl transform transition-all sm:my-8 sm:max-w-xl sm:w-full sm:p-6">
+                <button
+                    onClick={ () => {
+                        if(closable) {
+                            modal.hide();
+                        }
+                    } }
+                    className={classNames("absolute -right-3 -top-3 bg-gray-500 rounded-lg p-1 shadow-lg hover:bg-red-500 hover:scale-125 transition-all", closable ? "visible" : "hidden")}
+                >
+                    <XIcon className={"text-white"} width={24}/>
+                </button>
                 <div className="mt-3 text-center sm:mt-0 sm:text-left">
                     <Dialog.Title
                         as="h3"
