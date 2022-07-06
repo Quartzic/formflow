@@ -8,7 +8,7 @@ import metadataSlice from "./metadataSlice";
 import * as Sentry from "@sentry/react";
 import posthogMiddleware from "./posthogMiddleware";
 import databaseQueueSlice from "./databaseQueueSlice";
-
+import settingsSlice from "./settingsSlice";
 // ...
 
 const sentryReduxEnhancer = Sentry.createReduxEnhancer({
@@ -32,7 +32,8 @@ export const reducers = combineReducers({
     submissions: submissionsSlice.reducer,
     workflow: workflowSlice.reducer,
     metadata: metadataSlice.reducer,
-    databaseQueue: databaseQueueSlice.reducer
+    databaseQueue: databaseQueueSlice.reducer,
+    settings: settingsSlice.reducer
 });
 
 const persistedRootReducer = persistReducer({

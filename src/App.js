@@ -59,6 +59,8 @@ function App() {
   const submissions = useSelector((state) => state.submissions);
   const metadata = useSelector((state) => state.metadata);
   const workflow = useSelector((state) => state.workflow);
+  const settings = useSelector((state) => state.settings);
+
 
   /*
   useMousetrap(["ctrl+z", "command+z"], () => {
