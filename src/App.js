@@ -1,6 +1,6 @@
 import NiceModal from "@ebay/nice-modal-react";
 import PrintModal from "./Components/Modals/PrintModal";
-import {PrinterIcon} from "@heroicons/react/solid";
+import {CogIcon, PrinterIcon} from "@heroicons/react/solid";
 import ConfirmModal from "./Components/Modals/ConfirmModal";
 import {WorkflowView} from "./Views/WorkflowView";
 import Papa from "papaparse";
@@ -14,12 +14,11 @@ import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
 import * as Sentry from "@sentry/react";
 import {ToastContainer} from "react-toastify";
-import React from "react";
+import React, {useEffect} from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import posthog from 'posthog-js';
-import {addSubmissionToDBOrQueue} from "./Data/postgrest";
-import ConnectionStatus from "./Components/ConnectionStatus";
 import classNames from "classnames";
+import SettingsModal from "./Components/Modals/SettingsModal";
 
 const appVersion = require("../package.json").version;
 
@@ -43,14 +42,8 @@ function preprocessSubmissionsForCSVExport(submissions, metadata) {
   });
 }
 
-export function downloadCSV(csv, title) {
-  let blob = new Blob([csv], { type: "text/csv" });
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = `${new Date().toISOString()}_${title}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+export async function downloadFile(path, data) {
+  return window.electronAPI.saveFile(path, data);
 }
 
 function App() {
@@ -59,71 +52,34 @@ function App() {
   const submissions = useSelector((state) => state.submissions);
   const metadata = useSelector((state) => state.metadata);
   const workflow = useSelector((state) => state.workflow);
-
-  /*
-  useMousetrap(["ctrl+z", "command+z"], () => {
-
-    if(store.getState().past.length > 0) {
-
-      dispatch(UndoActionCreators.undo())
-      toast(
-          <p className={"text-gray-900 text-lg"}>
-            Undid an action
-            <br/>
-            <p className={"text-xs text-gray-500"}>Press <kbd>Ctrl+Y</kbd> to redo</p>
-          </p>);
-    }else{
-        toast(
-            "No more actions to undo")
+  const settings = useSelector((state) => state.settings);
+  useEffect(() => {
+      if(!settings.workflowSaveLocation || !settings.barcodeSaveLocation) {
+          NiceModal.show("settings-modal");
       }
+  }, [settings.workflowSaveLocation, settings.barcodeSaveLocation]);
 
-    });
-  useMousetrap(["ctrl+y", "command+shift+z"], () => {
-    if(store.getState().future.length > 0) {
-      dispatch(UndoActionCreators.redo())
-      toast(
-          <p className={"text-gray-900 text-lg"}>
-            Redid an action
-            <br/>
-            <p className={"text-xs text-gray-500"}>Press <kbd>Ctrl+Z</kbd> to undo</p>
-          </p>);
-    }else{
-        toast("Nothing to redo", {type: "error"});
-    }
-  });
-*/
 
-  function exportSubmissionsAsCSV(submissions, metadata) {
+  async function exportSubmissionsAsCSV(submissions, metadata, location) {
     // We need to apply metadata to the submissionsSlice
     let results = preprocessSubmissionsForCSVExport(submissions, metadata);
 
     // export results as CSV
-    downloadCSV(
-      Papa.unparse(results),
-      `${metadata.refNumber}_${metadata.workflow}_${metadata.username}`
+    return downloadFile(
+        `${location}/${new Date().toISOString().replaceAll('/', '-').replaceAll(':', '-')}_${metadata.refNumber}_${metadata.workflow}_${metadata.username}.csv`,
+      Papa.unparse(results)
     );
 
   }
 
-/*   function exportBarcodesAsCSV(submissions) {
-    let barcodes = [
-      [
-        // add a stringified representation of the metadata as the first element in the CSV
-        JSON.stringify(metadata),
-        ...submissions.map((submission) => {
-          return submission["data"];
-        }),
-      ],
-    ];
-    downloadCSV(Papa.unparse(barcodes), "barcodes");
-
-  }*/
   return (
     <>
-      <ConnectionStatus />
       <PrintModal
         id="print-modal"
       />
+      <SettingsModal
+        id="settings-modal"
+        />
       <div
         className={
           "flex flex-col items-center md:justify-center p-5 md:h-screen w-full max-h-screen"
@@ -138,26 +94,36 @@ function App() {
               metadata={metadata}
               submissionCallback={
                 (submission) => {
-                  dispatch(submissionsSlice.actions.add(submission))
-                  addSubmissionToDBOrQueue(submission, metadata);
+                  dispatch(submissionsSlice.actions.add(submission));
                   }}
               submissions={submissions}
               deleteSubmission={(index) => {
                 dispatch(submissionsSlice.actions.remove(index));
               }}
               onClick={() => {
-                exportSubmissionsAsCSV(submissions, metadata);
-                NiceModal.show(ConfirmModal, {
-                  title: "Are you sure?",
-                  message: `This will clear ${submissions.length} submissions and reset the application to its original state. Make sure you've downloaded your work first.`,
-                  action: "End job",
-                  onAction: () => {
-                    dispatch(submissionsSlice.actions.clear());
-                    dispatch(metadataSlice.actions.clear());
-                    dispatch(workflowSlice.actions.clear());
-                    // dispatch(databaseQueueSlice.actions.clear());
+                  if(submissions.length > 0) {
+                      exportSubmissionsAsCSV(submissions, metadata, settings.workflowSaveLocation).then((result) => {
+                              if (result) {
+                                  NiceModal.show(ConfirmModal, {
+                                      title: "Submissions exported successfully",
+                                      message: `Saved ${submissions.length} submissions to ${settings.workflowSaveLocation}`,
+                                      action: "End job",
+                                      onAction: () => {
+                                          dispatch(submissionsSlice.actions.clear());
+                                          dispatch(metadataSlice.actions.clear());
+                                          dispatch(workflowSlice.actions.clear());
+                                      }
+                                  });
+                              } else {
+                                  alert("Something went wrong saving your work.");
+                              }
+                          }
+                      );
+                  }else{
+                      dispatch(submissionsSlice.actions.clear());
+                      dispatch(metadataSlice.actions.clear());
+                      dispatch(workflowSlice.actions.clear());
                   }
-                });
               }}
             />
 
@@ -185,6 +151,16 @@ function App() {
           >
             <PrinterIcon width={20} className="mr-1" />
             Print barcodes
+          </button>
+          <button
+              onClick={() => {
+                NiceModal.show("settings-modal");
+              }}
+              type="button"
+              className="inline-flex items-center m-2 px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:scale-105 hover:shadow-md transition-all"
+          >
+            <CogIcon width={20} className="mr-1" />
+            Settings
           </button>
         </div>
       </div>

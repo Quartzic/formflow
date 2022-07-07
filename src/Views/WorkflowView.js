@@ -14,9 +14,13 @@ export function WorkflowView(props) {
                     enterFrom="scale-50 opacity-0"
                     enterTo="scale-100 opacity-100">
             <div className={"md:flex gap-12 flex-1 md:h-full space-y-10 md:space-y-0"}>
-                <div className={"flex gap-6 md:gap-0 flex-col md:flex-col-reverse justify-between"}>
+                <div className={"flex gap-6 md:gap-0 flex-col-reverse md:flex-col justify-between overflow-y-auto p-2"}>
 
-                    <div className={"rounded-lg shadow-md p-3"}>
+                    <SchemaBasedForm
+                        fields={props.workflow.submissionFields}
+                        submissionCallback={props.submissionCallback}
+                    />
+                    <div className={"rounded-lg shadow-md p-3 md:mt-3"}>
                         <h1 className={"font-bold text-lg"}>
                             Job info
                         </h1>
@@ -53,10 +57,6 @@ export function WorkflowView(props) {
                             End job
                         </button>
                     </div>
-                    <SchemaBasedForm
-                        fields={props.workflow.submissionFields}
-                        submissionCallback={props.submissionCallback}
-                    />
                 </div>
 
                 <div className={"h-96 md:h-full md:flex-1 overflow-y-auto"}>

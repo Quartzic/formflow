@@ -25,6 +25,3 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
-
-# private Expeditors data
-/src/Data/CHS-DC2.json

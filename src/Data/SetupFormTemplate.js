@@ -78,7 +78,7 @@ export function createSetupFormFields(workflows) {
     },*/
     {
       id: "workflow",
-      label: "Select a workflow template",
+      label: "Select a workflow",
       type: "select",
       initialValue: workflowSelectorOptions[0].value,
       options: workflowSelectorOptions,
