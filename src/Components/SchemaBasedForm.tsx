@@ -63,7 +63,7 @@ export function evaluateMagicField(field: { magic: MagicSchema, id: string }, va
   }
 }
 
-function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void; }) {
+function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void; submitButtonText?: string }) {
   let initialValues : {[key: string]: string;} = {};
   const firstFormFieldRef = useRef(null);
   props.fields.forEach((field) => {
@@ -266,7 +266,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
             type="submit"
             className="px-4 py-2 cursor-pointer md font-medium text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 hover:scale-105 hover:shadow-md transition-all"
           >
-            Submit
+            {props.submitButtonText ? props.submitButtonText : "Submit"}
           </button>
         </Form>
       )}

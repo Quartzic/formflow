@@ -36,6 +36,7 @@ function PrintModalView(props) {
                                     }
                                 });
                         }}
+                        submitButtonText={"Print"}
                     />
                 </div>
             </>
