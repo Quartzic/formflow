@@ -17,8 +17,6 @@ import {ToastContainer} from "react-toastify";
 import React, {useEffect} from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import posthog from 'posthog-js';
-import {addSubmissionToDBOrQueue} from "./Data/postgrest";
-import ConnectionStatus from "./Components/ConnectionStatus";
 import classNames from "classnames";
 import SettingsModal from "./Components/Modals/SettingsModal";
 
@@ -59,7 +57,7 @@ function App() {
       if(!settings.workflowSaveLocation || !settings.barcodeSaveLocation) {
           NiceModal.show("settings-modal");
       }
-  }, []);
+  }, [settings.workflowSaveLocation, settings.barcodeSaveLocation]);
 
   /*
   useMousetrap(["ctrl+z", "command+z"], () => {
@@ -121,7 +119,6 @@ function App() {
   }*/
   return (
     <>
-      <ConnectionStatus />
       <PrintModal
         id="print-modal"
       />
@@ -142,8 +139,7 @@ function App() {
               metadata={metadata}
               submissionCallback={
                 (submission) => {
-                  dispatch(submissionsSlice.actions.add(submission))
-                  addSubmissionToDBOrQueue(submission, metadata);
+                  dispatch(submissionsSlice.actions.add(submission));
                   }}
               submissions={submissions}
               deleteSubmission={(index) => {
