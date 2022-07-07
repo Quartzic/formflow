@@ -20,7 +20,7 @@ function SettingsItem(props) {
         <div className="mt-0 ml-6 flex-shrink-0">
             <button
                 type="button"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                className="inline-flex items-center px-4 py-2 border shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                 onClick={props.onClick}
             >
                 Edit
