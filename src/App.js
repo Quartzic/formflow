@@ -101,25 +101,29 @@ function App() {
                 dispatch(submissionsSlice.actions.remove(index));
               }}
               onClick={() => {
-                exportSubmissionsAsCSV(submissions, metadata, settings.workflowSaveLocation).then( (result) =>
-                  {
-                      if (result) {
-                          NiceModal.show(ConfirmModal, {
-                              title: "Submissions exported successfully",
-                              message: `Saved ${submissions.length} submissions to ${settings.workflowSaveLocation}`,
-                              action: "End job",
-                              onAction: () => {
-                                  dispatch(submissionsSlice.actions.clear());
-                                  dispatch(metadataSlice.actions.clear());
-                                  dispatch(workflowSlice.actions.clear());
-                                  // dispatch(databaseQueueSlice.actions.clear());
+                  if(submissions.length > 0) {
+                      exportSubmissionsAsCSV(submissions, metadata, settings.workflowSaveLocation).then((result) => {
+                              if (result) {
+                                  NiceModal.show(ConfirmModal, {
+                                      title: "Submissions exported successfully",
+                                      message: `Saved ${submissions.length} submissions to ${settings.workflowSaveLocation}`,
+                                      action: "End job",
+                                      onAction: () => {
+                                          dispatch(submissionsSlice.actions.clear());
+                                          dispatch(metadataSlice.actions.clear());
+                                          dispatch(workflowSlice.actions.clear());
+                                      }
+                                  });
+                              } else {
+                                  alert("Something went wrong saving your work.");
                               }
-                          });
-                      } else {
-                          alert("Something went wrong saving your work.");
-                      }
+                          }
+                      );
+                  }else{
+                      dispatch(submissionsSlice.actions.clear());
+                      dispatch(metadataSlice.actions.clear());
+                      dispatch(workflowSlice.actions.clear());
                   }
-                );
               }}
             />
 
