@@ -59,38 +59,6 @@ function App() {
       }
   }, [settings.workflowSaveLocation, settings.barcodeSaveLocation]);
 
-  /*
-  useMousetrap(["ctrl+z", "command+z"], () => {
-
-    if(store.getState().past.length > 0) {
-
-      dispatch(UndoActionCreators.undo())
-      toast(
-          <p className={"text-gray-900 text-lg"}>
-            Undid an action
-            <br/>
-            <p className={"text-xs text-gray-500"}>Press <kbd>Ctrl+Y</kbd> to redo</p>
-          </p>);
-    }else{
-        toast(
-            "No more actions to undo")
-      }
-
-    });
-  useMousetrap(["ctrl+y", "command+shift+z"], () => {
-    if(store.getState().future.length > 0) {
-      dispatch(UndoActionCreators.redo())
-      toast(
-          <p className={"text-gray-900 text-lg"}>
-            Redid an action
-            <br/>
-            <p className={"text-xs text-gray-500"}>Press <kbd>Ctrl+Z</kbd> to undo</p>
-          </p>);
-    }else{
-        toast("Nothing to redo", {type: "error"});
-    }
-  });
-*/
 
   async function exportSubmissionsAsCSV(submissions, metadata, location) {
     // We need to apply metadata to the submissionsSlice
@@ -104,19 +72,6 @@ function App() {
 
   }
 
-/*   function exportBarcodesAsCSV(submissions) {
-    let barcodes = [
-      [
-        // add a stringified representation of the metadata as the first element in the CSV
-        JSON.stringify(metadata),
-        ...submissions.map((submission) => {
-          return submission["data"];
-        }),
-      ],
-    ];
-    downloadFile(Papa.unparse(barcodes), "barcodes");
-
-  }*/
   return (
     <>
       <PrintModal
