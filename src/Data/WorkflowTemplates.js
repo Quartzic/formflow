@@ -144,8 +144,8 @@ let WorkflowTemplates = [
     ],
   },
   {
-    name: "On Hand & Container",
-    id: "onhand-container",
+    name: "On Hand & Addl. Ref.",
+    id: "onhand-addl-ref",
     submissionFields: [
       {
         id: "onhand",
@@ -155,8 +155,8 @@ let WorkflowTemplates = [
         placeholder: "",
       },
       {
-        id: "container",
-        label: "Container",
+        id: "addl-ref",
+        label: "Addl. Ref. (co., loc., etc.)",
         type: "text",
         initialValue: "",
         placeholder: "",
