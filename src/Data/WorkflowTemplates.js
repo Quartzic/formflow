@@ -163,6 +163,19 @@ let WorkflowTemplates = [
       },
     ],
   },
+  {
+    name: "Single Field",
+    id: "single-field",
+    submissionFields: [
+      {
+        id: "data",
+        label: "Data",
+        type: "text",
+        initialValue: "",
+        placeholder: "",
+      }
+    ],
+  },
 ];
 
 export default WorkflowTemplates;
